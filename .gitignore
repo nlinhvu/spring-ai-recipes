@@ -1,0 +1,48 @@
+# Gradle build output and caches
+**/.gradle/
+**/build/
+
+# Java/JVM artifacts
+*.class
+hs_err_pid*
+replay_pid*
+
+# IDE metadata
+.idea/
+*.iws
+*.iml
+*.ipr
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache/
+.apt_generated/
+bin/
+out/
+.vscode/
+nbproject/private/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+!.env.sample
+
+# Logs and temporary files
+*.log
+*.tmp
+*.swp
+*.swo
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+.codex
+.claude
