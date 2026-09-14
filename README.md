@@ -13,3 +13,5 @@
 13. qdrant-semantic-cache
 14. rag
 15. rag-tool
+16. voicechat-stt
+17. voicechat-tts

@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: voicechat-stt
+
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY:}
+      chat:
+        model: gpt-4o-mini
+      audio:
+        transcription:
+          model: gpt-4o-mini-transcribe
+
+logging:
+  level:
+    org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor: debug
+    org.zalando: trace
