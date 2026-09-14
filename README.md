@@ -18,3 +18,4 @@
 18. voicechat-tts-elevenlabs
 19. structure-output-validation
 20. safeguard-input
+21. safeguard-output
