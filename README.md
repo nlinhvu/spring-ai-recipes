@@ -19,3 +19,4 @@
 19. structure-output-validation
 20. safeguard-input
 21. safeguard-output
+22. safeguard-semantic
