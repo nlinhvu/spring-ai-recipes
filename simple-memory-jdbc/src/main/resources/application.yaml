@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: simple-memory-jdbc
+
+  datasource:
+    url: jdbc:postgresql://localhost:5434/chatmemorydb
+    username: user
+    password: secret
+
+  ai:
+    openai:
+      api-key: ${GEMINI_API_KEY:}
+      base-url: https://generativelanguage.googleapis.com/v1beta/openai
+      chat:
+        model: gemini-3.1-flash-lite
+
+    chat:
+      memory:
+        repository:
+          jdbc:
+            initialize-schema: always
+
+logging:
+  level:
+    org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor: debug
+    org.zalando: trace

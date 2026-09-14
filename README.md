@@ -33,30 +33,31 @@ On Windows, use `gradlew.bat` instead of `./gradlew`.
 
 ## Recipes
 
-| # | Recipe | Focus | Provider or service |
-| ---: | --- | --- | --- |
-| 1 | [`logging-openai`](logging-openai) | Log chat traffic through the OpenAI client | Google Gemini via OpenAI-compatible API |
-| 2 | [`logging-googleai`](logging-googleai) | Log Google GenAI chat traffic | Google Gemini |
-| 3 | [`tool-use`](tool-use) | Basic tool calling | Google Gemini |
-| 4 | [`simple-memory`](simple-memory) | Conversation memory | Google Gemini |
-| 5 | [`ask-user-question`](ask-user-question) | Ask the user for missing information | Google Gemini via OpenAI-compatible API |
-| 6 | [`todo-write-tool`](todo-write-tool) | Todo-writing tool workflow | Google Gemini |
-| 7 | [`skill`](skill) | Agent utility skills | Google Gemini via OpenAI-compatible API |
-| 8 | [`skillsjars`](skillsjars) | Skills packaged as JAR dependencies | Google Gemini via OpenAI-compatible API |
-| 9 | [`auto-memory-tool`](auto-memory-tool) | Automatic memory tool workflow | Google Gemini via OpenAI-compatible API |
-| 10 | [`tool-call-advisor`](tool-call-advisor) | Tool-call advisor pattern | Google Gemini via OpenAI-compatible API |
-| 11 | [`augmented-tool-callback`](augmented-tool-callback) | Augmented tool callbacks | Google Gemini via OpenAI-compatible API |
-| 12 | [`redis-semantic-cache`](redis-semantic-cache) | Semantic response caching | Gemini chat, Google embeddings, Redis |
-| 13 | [`qdrant-semantic-cache`](qdrant-semantic-cache) | Semantic caching with Qdrant | Gemini chat, Google embeddings, Qdrant |
-| 14 | [`rag`](rag) | Retrieval-augmented generation | Gemini chat, Google embeddings, Qdrant |
-| 15 | [`rag-tool`](rag-tool) | RAG exposed through a tool | Gemini chat, Google embeddings, Qdrant |
-| 16 | [`voicechat-stt`](voicechat-stt) | Speech-to-text voice chat | OpenAI |
-| 17 | [`voicechat-tts`](voicechat-tts) | Text-to-speech voice chat | OpenAI |
-| 18 | [`voicechat-tts-elevenlabs`](voicechat-tts-elevenlabs) | Text-to-speech with ElevenLabs | OpenAI, ElevenLabs |
+|  # | Recipe                                                         | Focus | Provider or service |
+|---:|----------------------------------------------------------------| --- | --- |
+|  1 | [`logging-openai`](logging-openai)                             | Log chat traffic through the OpenAI client | Google Gemini via OpenAI-compatible API |
+|  2 | [`logging-googleai`](logging-googleai)                         | Log Google GenAI chat traffic | Google Gemini |
+|  3 | [`tool-use`](tool-use)                                         | Basic tool calling | Google Gemini |
+|  4 | [`simple-memory`](simple-memory)                               | Conversation memory | Google Gemini |
+|  5 | [`ask-user-question`](ask-user-question)                       | Ask the user for missing information | Google Gemini via OpenAI-compatible API |
+|  6 | [`todo-write-tool`](todo-write-tool)                           | Todo-writing tool workflow | Google Gemini |
+|  7 | [`skill`](skill)                                               | Agent utility skills | Google Gemini via OpenAI-compatible API |
+|  8 | [`skillsjars`](skillsjars)                                     | Skills packaged as JAR dependencies | Google Gemini via OpenAI-compatible API |
+|  9 | [`auto-memory-tool`](auto-memory-tool)                         | Automatic memory tool workflow | Google Gemini via OpenAI-compatible API |
+| 10 | [`tool-call-advisor`](tool-call-advisor)                       | Tool-call advisor pattern | Google Gemini via OpenAI-compatible API |
+| 11 | [`augmented-tool-callback`](augmented-tool-callback)           | Augmented tool callbacks | Google Gemini via OpenAI-compatible API |
+| 12 | [`redis-semantic-cache`](redis-semantic-cache)                 | Semantic response caching | Gemini chat, Google embeddings, Redis |
+| 13 | [`qdrant-semantic-cache`](qdrant-semantic-cache)               | Semantic caching with Qdrant | Gemini chat, Google embeddings, Qdrant |
+| 14 | [`rag`](rag)                                                   | Retrieval-augmented generation | Gemini chat, Google embeddings, Qdrant |
+| 15 | [`rag-tool`](rag-tool)                                         | RAG exposed through a tool | Gemini chat, Google embeddings, Qdrant |
+| 16 | [`voicechat-stt`](voicechat-stt)                               | Speech-to-text voice chat | OpenAI |
+| 17 | [`voicechat-tts`](voicechat-tts)                               | Text-to-speech voice chat | OpenAI |
+| 18 | [`voicechat-tts-elevenlabs`](voicechat-tts-elevenlabs)         | Text-to-speech with ElevenLabs | OpenAI, ElevenLabs |
 | 19 | [`structured-output-validation`](structured-output-validation) | Structured output validation | Ollama |
-| 20 | [`safeguard-input`](safeguard-input) | Input safety checks | Google Gemini |
-| 21 | [`safeguard-output`](safeguard-output) | Output safety checks | Google Gemini |
-| 22 | [`safeguard-semantic`](safeguard-semantic) | Semantic safety checks | Gemini via OpenAI-compatible API, Ollama |
+| 20 | [`safeguard-input`](safeguard-input)                           | Input safety checks | Google Gemini |
+| 21 | [`safeguard-output`](safeguard-output)                         | Output safety checks | Google Gemini |
+| 22 | [`safeguard-semantic`](safeguard-semantic)                     | Semantic safety checks | Gemini via OpenAI-compatible API, Ollama |
+| 23 | [`simple-memory-jdbc`](simple-memory-jdbc)                     | Conversation memory | Google Gemini |
 
 ## Configuration
 
