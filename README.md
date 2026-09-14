@@ -15,3 +15,4 @@
 15. rag-tool
 16. voicechat-stt
 17. voicechat-tts
+18. voicechat-tts-elevenlabs

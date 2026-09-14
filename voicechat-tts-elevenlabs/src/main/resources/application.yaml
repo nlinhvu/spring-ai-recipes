@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: voicechat-tts-elevenlabs
+
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY:}
+      chat:
+        model: gpt-4o-mini
+      audio:
+        speech:
+          model: tts-1
+          voice: fable
+
+    elevenlabs:
+      api-key: ${ELEVENLABS_API_KEY:}
+      tts:
+        voice-id: 21m00Tcm4TlvDq8ikWAM
+
+logging:
+  level:
+    org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor: debug
+    org.zalando: trace
