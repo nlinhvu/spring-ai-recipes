@@ -62,6 +62,7 @@ On Windows, use `gradlew.bat` instead of `./gradlew`.
 | 25 | [`rag-conversation-aware`](rag-conversation-aware)             | Conversation-aware retrieval-augmented generation | Gemini chat, Google embeddings, Qdrant |
 | 26 | [`rag-metadata-filter`](rag-metadata-filter)                   | Metadata-filtered retrieval-augmented generation | Gemini chat, Google embeddings, Qdrant |
 | 27 | [`rag-hyde`](rag-hyde)                                         | Hypothetical document embeddings for retrieval | Gemini chat, Google embeddings, Qdrant |
+| 28 | [`rag-hybrid`](rag-hybrid)                                     | Hybrid vector and BM25 retrieval | Gemini chat, Google embeddings, Qdrant, Lucene |
 
 ## Configuration
 
@@ -83,7 +84,7 @@ docker compose up -d
 ./gradlew bootRun
 ```
 
-The Qdrant recipes include their own `compose.yaml`; `rag`, `rag-tool`, `rag-conversation-aware`, `rag-metadata-filter`, `rag-hyde`, `redis-semantic-cache`, and `qdrant-semantic-cache` are the recipes that need an additional service.
+The Qdrant recipes include their own `compose.yaml`; `rag`, `rag-tool`, `rag-conversation-aware`, `rag-metadata-filter`, `rag-hyde`, `rag-hybrid`, `redis-semantic-cache`, and `qdrant-semantic-cache` are the recipes that need an additional service.
 
 ## Project layout
 
