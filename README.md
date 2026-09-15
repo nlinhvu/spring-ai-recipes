@@ -64,6 +64,7 @@ On Windows, use `gradlew.bat` instead of `./gradlew`.
 | 27 | [`rag-hyde`](rag-hyde)                                         | Hypothetical document embeddings for retrieval | Gemini chat, Google embeddings, Qdrant |
 | 28 | [`rag-hybrid`](rag-hybrid)                                     | Hybrid vector and BM25 retrieval | Gemini chat, Google embeddings, Qdrant, Lucene |
 | 29 | [`rag-reranking`](rag-reranking)                               | LLM-based reranking after retrieval | Gemini chat, Google embeddings, Qdrant, Lucene |
+| 30 | [`graph-workflow-langgraph4j`](graph-workflow-langgraph4j)     | Conditional support-routing graph workflow | Google Gemini via OpenAI-compatible API, LangGraph4j |
 
 ## Configuration
 
