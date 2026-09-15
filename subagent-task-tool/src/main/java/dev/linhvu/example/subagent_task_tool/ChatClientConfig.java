@@ -29,7 +29,7 @@ public class ChatClientConfig {
 
 		ChatClient.Builder builder = ChatClient.builder(openAiChatModel);
 
-		customizers.forEach(customizer -> customizer.customize(builder));
+		customizers.orderedStream().forEach(customizer -> customizer.customize(builder));
 
 		return builder;
 	}
