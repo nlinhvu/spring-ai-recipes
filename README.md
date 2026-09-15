@@ -63,6 +63,7 @@ On Windows, use `gradlew.bat` instead of `./gradlew`.
 | 26 | [`rag-metadata-filter`](rag-metadata-filter)                   | Metadata-filtered retrieval-augmented generation | Gemini chat, Google embeddings, Qdrant |
 | 27 | [`rag-hyde`](rag-hyde)                                         | Hypothetical document embeddings for retrieval | Gemini chat, Google embeddings, Qdrant |
 | 28 | [`rag-hybrid`](rag-hybrid)                                     | Hybrid vector and BM25 retrieval | Gemini chat, Google embeddings, Qdrant, Lucene |
+| 29 | [`rag-reranking`](rag-reranking)                               | LLM-based reranking after retrieval | Gemini chat, Google embeddings, Qdrant, Lucene |
 
 ## Configuration
 
@@ -84,7 +85,9 @@ docker compose up -d
 ./gradlew bootRun
 ```
 
-The Qdrant recipes include their own `compose.yaml`; `rag`, `rag-tool`, `rag-conversation-aware`, `rag-metadata-filter`, `rag-hyde`, `rag-hybrid`, `redis-semantic-cache`, and `qdrant-semantic-cache` are the recipes that need an additional service.
+The Qdrant recipes include their own `compose.yaml`; `rag`, `rag-tool`, `rag-conversation-aware`, `rag-metadata-filter`, `rag-hyde`, `rag-hybrid`, `rag-reranking`, `redis-semantic-cache`, and `qdrant-semantic-cache` are the recipes that need an additional service.
+
+The `rag-hybrid` and `rag-reranking` recipes require `RagIngestionConfig` to run before their `LuceneSearch` bean is created, so the Lucene index exists before search initialization.
 
 ## Project layout
 
