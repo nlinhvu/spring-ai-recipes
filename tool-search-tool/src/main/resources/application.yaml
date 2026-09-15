@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: tool-search-tool
+
+  ai:
+    openai:
+      api-key: ${GEMINI_API_KEY:}
+      base-url: https://generativelanguage.googleapis.com/v1beta/openai
+      chat:
+        model: gemini-3.1-flash-lite
+
+# Auto Configuration
+#    chat:
+#      client:
+#        tool-search-advisor:
+#          enabled: true
+#          tool-index-type: lucene
+
+logging:
+  level:
+    org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor: debug
+    org.zalando: trace
