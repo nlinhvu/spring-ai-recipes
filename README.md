@@ -60,6 +60,8 @@ On Windows, use `gradlew.bat` instead of `./gradlew`.
 | 23 | [`simple-memory-jdbc`](simple-memory-jdbc)                     | Conversation memory | Google Gemini |
 | 24 | [`subagent-task-tool`](subagent-task-tool)                     | Delegate tasks to subagents through a tool | Google Gemini |
 | 25 | [`rag-conversation-aware`](rag-conversation-aware)             | Conversation-aware retrieval-augmented generation | Gemini chat, Google embeddings, Qdrant |
+| 26 | [`rag-metadata-filter`](rag-metadata-filter)                   | Metadata-filtered retrieval-augmented generation | Gemini chat, Google embeddings, Qdrant |
+| 27 | [`rag-hyde`](rag-hyde)                                         | Hypothetical document embeddings for retrieval | Gemini chat, Google embeddings, Qdrant |
 
 ## Configuration
 
@@ -81,7 +83,7 @@ docker compose up -d
 ./gradlew bootRun
 ```
 
-The Qdrant recipes include their own `compose.yaml`; `rag`, `rag-tool`, `redis-semantic-cache`, and `qdrant-semantic-cache` are the recipes that need an additional service.
+The Qdrant recipes include their own `compose.yaml`; `rag`, `rag-tool`, `rag-conversation-aware`, `rag-metadata-filter`, `rag-hyde`, `redis-semantic-cache`, and `qdrant-semantic-cache` are the recipes that need an additional service.
 
 ## Project layout
 
@@ -98,7 +100,7 @@ Every recipe follows the same basic structure:
     └── test/java/
 ```
 
-The `rag` and `rag-tool` examples include `src/main/resources/Sagrada.pdf`, an original synthetic knowledge-base PDF created for demonstrating document ingestion and retrieval. Despite the retained filename for compatibility with the examples, it contains no Sagrada game content.
+The `rag`, `rag-tool`, and `rag-hyde` examples include `src/main/resources/Sagrada.pdf`, an original synthetic knowledge-base PDF created for demonstrating document ingestion and retrieval. Despite the retained filename for compatibility with the examples, it contains no Sagrada game content.
 
 ## Contributing
 
