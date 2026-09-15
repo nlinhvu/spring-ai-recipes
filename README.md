@@ -58,6 +58,7 @@ On Windows, use `gradlew.bat` instead of `./gradlew`.
 | 21 | [`safeguard-output`](safeguard-output)                         | Output safety checks | Google Gemini |
 | 22 | [`safeguard-semantic`](safeguard-semantic)                     | Semantic safety checks | Gemini via OpenAI-compatible API, Ollama |
 | 23 | [`simple-memory-jdbc`](simple-memory-jdbc)                     | Conversation memory | Google Gemini |
+| 24 | [`subagent-task-tool`](subagent-task-tool)                     | Delegate tasks to subagents through a tool | Google Gemini |
 
 ## Configuration
 
