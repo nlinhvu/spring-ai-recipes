@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: local-modeljars
+
+logging:
+  level:
+    org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor: debug
+    org.zalando: trace
