@@ -67,6 +67,7 @@ On Windows, use `gradlew.bat` instead of `./gradlew`.
 | 30 | [`graph-workflow-langgraph4j`](graph-workflow-langgraph4j)     | Conditional support-routing graph workflow | Google Gemini via OpenAI-compatible API, LangGraph4j |
 | 31 | [`tool-search-tool`](tool-search-tool)                         | Search and select tools dynamically | Google Gemini via OpenAI-compatible API, Lucene |
 | 32 | [`local-modeljars`](local-modeljars)                           | Run a local model packaged as a Model JAR | Local Qwen3 model, Model JARs |
+| 33 | [`memory-session-summarization`](memory-session-summarization) | Session memory with recursive summarization | Google Gemini via OpenAI-compatible API, Spring AI sessions |
 
 ## Configuration
 
