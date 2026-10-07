@@ -1,0 +1,11 @@
+server:
+  port: 3000
+
+spring:
+  application:
+    name: mcp-server-api-key
+
+  ai:
+    mcp:
+      server:
+        protocol: stateless
