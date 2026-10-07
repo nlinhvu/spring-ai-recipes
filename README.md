@@ -71,6 +71,7 @@ On Windows, use `gradlew.bat` instead of `./gradlew`.
 | 34 | [`typesafe-simple`](typesafe-simple)                         | Typed classification and scoring with confidence-based support routing | TypeSafe (local Nimble model), Google Gemini via OpenAI-compatible API |
 | 35 | [`mcp-stdio-server`](mcp-stdio-server)                       | Expose an annotated weather tool through an MCP server over standard input/output | MCP client, no model provider required |
 | 36 | [`mcp-http-server`](mcp-http-server)                         | Expose an annotated weather tool through a stateless MCP server over HTTP | MCP client, no model provider required |
+| 37 | [`mcp-client-plain`](mcp-client-plain)                       | Interactive chat with MCP tools registered through a ToolCallbackProvider | Google Gemini via OpenAI-compatible API, MCP HTTP server |
 
 ## Configuration
 
@@ -88,6 +89,8 @@ The exact model and endpoint settings are in each recipe's `src/main/resources/a
 The `mcp-stdio-server` recipe enables the MCP stdio transport with `spring.ai.mcp.server.stdio: true` and exposes `get-weather-for-zipcode` using `@McpTool`. The tool returns sample weather data and requires no API key or external weather service.
 
 The `mcp-http-server` recipe uses `spring.ai.mcp.server.protocol: stateless` and listens on port `3000`. Connect an MCP client using Streamable HTTP transport to `http://localhost:3000/mcp` to call `get-weather-for-zipcode`. The tool returns sample weather data and requires no API key or external weather service.
+
+The `mcp-client-plain` recipe connects to `mcp-http-server` at `http://localhost:3000/mcp` using Streamable HTTP and registers the discovered MCP tools with its `ChatClient` through a `ToolCallbackProvider`. Start `mcp-http-server` first, then run `mcp-client-plain` with `GEMINI_API_KEY` set and enter prompts in its interactive console.
 
 The `typesafe-simple` recipe uses a local TypeSafe endpoint at `http://localhost:11434` with the `nimble` model. It classifies a support message by urgency and department, scores customer frustration, and uses department confidence to decide whether to route automatically or send the message to a human. Its configured Gemini chat client also reads `GEMINI_API_KEY`.
 
