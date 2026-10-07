@@ -1,0 +1,85 @@
+plugins {
+    id 'base'
+    // Declare shared plugin versions without applying them to the root.
+    id 'org.springframework.boot' version '4.1.1' apply false
+    id 'io.spring.dependency-management' version '1.1.7' apply false
+}
+
+ext {
+    springAiVersion = '2.0.1'
+    logbookVersion = '4.1.0'
+    agentUtilsVersion = '0.12.0'
+    mcpSecurityVersion = '0.1.14'
+    springAiSessionVersion = '0.8.0'
+    typeSafeVersion = '0.4.0'
+    luceneVersion = '10.5.1'
+    langgraph4jVersion = '1.8.24'
+    modelJarsVersion = '0.1.31'
+    modelsSpringAiVersion = '0.3.26'
+    qwenModelVersion = '3.0.0-q8_0.2'
+    pdfSkillsVersion = '2026_02_25-3d59511'
+    browserSkillsVersion = '2026_02_23-1d154e1'
+    jlayerVersion = '1.0.1'
+}
+
+// Configure application projects only; mcp-server-oauth is a grouping project.
+subprojects {
+    if (!file('build.gradle').exists()) {
+        return
+    }
+    apply plugin: 'java'
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'io.spring.dependency-management'
+
+    group = 'dev.linhvu.example'
+    version = '0.0.1-SNAPSHOT'
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(25)
+        }
+    }
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.ai:spring-ai-bom:${rootProject.ext.springAiVersion}"
+        }
+
+        dependencies {
+            dependency "org.zalando:logbook-spring-boot-starter:${rootProject.ext.logbookVersion}"
+            dependency "org.zalando:logbook-okhttp:${rootProject.ext.logbookVersion}"
+            dependency "org.springaicommunity:spring-ai-agent-utils:${rootProject.ext.agentUtilsVersion}"
+            dependency "org.springaicommunity:mcp-server-security-spring-boot:${rootProject.ext.mcpSecurityVersion}"
+            dependency "org.springaicommunity:mcp-authorization-server:${rootProject.ext.mcpSecurityVersion}"
+            dependency "org.springaicommunity:spring-ai-autoconfigure-session:${rootProject.ext.springAiSessionVersion}"
+            dependency "org.springaicommunity:spring-ai-starter-typesafe:${rootProject.ext.typeSafeVersion}"
+            dependency "org.springaicommunity:typesafe-spring-ai:${rootProject.ext.typeSafeVersion}"
+            dependency "org.apache.lucene:lucene-core:${rootProject.ext.luceneVersion}"
+            dependency "org.apache.lucene:lucene-queryparser:${rootProject.ext.luceneVersion}"
+            dependency "org.bsc.langgraph4j:langgraph4j-core:${rootProject.ext.langgraph4jVersion}"
+            dependency "org.modeljars:modeljars:${rootProject.ext.modelJarsVersion}"
+            dependency "com.integrallis:models-spring-ai:${rootProject.ext.modelsSpringAiVersion}"
+            dependency "org.modeljars.huggingface:qwen.qwen3-1.7b-gguf.q8_0:${rootProject.ext.qwenModelVersion}"
+            dependency "com.skillsjars:anthropics__skills__pdf:${rootProject.ext.pdfSkillsVersion}"
+            dependency "com.skillsjars:browser-use__browser-use__remote-browser:${rootProject.ext.browserSkillsVersion}"
+            dependency "javazoom:jlayer:${rootProject.ext.jlayerVersion}"
+        }
+    }
+
+    tasks.withType(Test).configureEach {
+        useJUnitPlatform()
+    }
+}
+
+// Allow ./gradlew build and ./gradlew clean to cover every application.
+tasks.named('build') {
+    dependsOn subprojects.findAll { it.buildFile.exists() }.collect { "${it.path}:build" }
+}
+
+tasks.named('clean') {
+    dependsOn subprojects.findAll { it.buildFile.exists() }.collect { "${it.path}:clean" }
+}

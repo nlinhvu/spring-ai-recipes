@@ -2,7 +2,7 @@
 
 Small, focused Spring AI examples for experimenting with chat clients, tools, memory, retrieval, audio, guardrails, and agent-oriented workflows.
 
-Most recipes are standalone Gradle projects; `mcp-server-oauth` contains separate authorization-server and MCP-server projects, and `jbang-tool-use` and `jbang-mcp` run Java source files with JBang. The examples are intentionally independent so you can open one directory, run it, and inspect the smallest useful implementation.
+Gradle recipes are subprojects of a shared root build; `mcp-server-oauth` contains separate authorization-server and MCP-server subprojects. Each application keeps its own source, configuration, and dependencies. The `jbang-tool-use` and `jbang-mcp` recipes run Java source files with JBang independently of Gradle.
 
 ## Requirements
 
@@ -16,21 +16,22 @@ The examples currently use Spring Boot 4.1.1 and Spring AI 2.0.1. Dependencies a
 
 ## Quick start
 
-Choose a recipe, enter its directory, and run it with the checked-in wrapper:
+Choose a recipe and run it with the checked-in root wrapper from the repository root:
 
 ```bash
-cd simple-memory
 export GEMINI_API_KEY=your-api-key
-./gradlew bootRun
+./gradlew :simple-memory:bootRun
 ```
 
 Run a recipe's tests with:
 
 ```bash
-./gradlew test
+./gradlew :simple-memory:test
 ```
 
 On Windows, use `gradlew.bat` instead of `./gradlew`.
+
+Shared plugin, dependency, application, and Java toolchain versions are managed in the root `build.gradle`. The root `settings.gradle` lists the Gradle subprojects. Import the root project in IntelliJ to load all recipes together. List projects with `./gradlew projects`, compile all application and test sources with `./gradlew testClasses`, or build all recipes with `./gradlew build` (some tests require API keys or running services). Existing recipe wrappers can still be used from their directories; without local settings files they use the shared root build.
 
 For `jbang-tool-use`, run the Java entry point from its directory:
 
@@ -119,7 +120,7 @@ The `mcp-client-plain` recipe connects to `mcp-http-server` at `http://localhost
 
 The `mcp-server-api-key` recipe exposes the sample weather tool at `http://localhost:3000/mcp` using stateless Streamable HTTP and requires API key authentication through Spring Security. Its `SecurityConfig` defines an in-memory demo key; send `X-MCP-API-KEY: ApiKeyId.Secret` on MCP requests, including initialization. The `mcp-client-plain` recipe includes a request customizer that sends this header. Run `mcp-server-api-key` in place of `mcp-http-server`, since both use port `3000`.
 
-The `mcp-server-oauth` recipe contains two Gradle projects. Start `auth-server` on port `9999`, then `mcp-server` on port `3000`, using each project's `./gradlew bootRun` in separate terminals. The MCP server uses stateless Streamable HTTP at `http://localhost:3000/mcp` and validates JWTs issued by `http://localhost:9999`; its weather tool requires the `meteorology` scope. The authorization server includes demo client credentials `myclient` / `mysecret`, user credentials `cloud` / `pw`, and MCP Inspector callback URLs on port `6274`. Configure an OAuth-capable MCP client to request the `meteorology` scope and send its access token as an `Authorization: Bearer <access-token>` header. Run this MCP server in place of the other MCP HTTP server recipes, which also use port `3000`.
+The `mcp-server-oauth` recipe contains two Gradle projects. Start `auth-server` on port `9999`, then `mcp-server` on port `3000`, using `./gradlew :mcp-server-oauth:auth-server:bootRun` and `./gradlew :mcp-server-oauth:mcp-server:bootRun` from the repository root in separate terminals. The MCP server uses stateless Streamable HTTP at `http://localhost:3000/mcp` and validates JWTs issued by `http://localhost:9999`; its weather tool requires the `meteorology` scope. The authorization server includes demo client credentials `myclient` / `mysecret`, user credentials `cloud` / `pw`, and MCP Inspector callback URLs on port `6274`. Configure an OAuth-capable MCP client to request the `meteorology` scope and send its access token as an `Authorization: Bearer <access-token>` header. Run this MCP server in place of the other MCP HTTP server recipes, which also use port `3000`.
 
 The `typesafe-simple` recipe uses a local TypeSafe endpoint at `http://localhost:11434` with the `nimble` model. It classifies a support message by urgency and department, scores customer frustration, and uses department confidence to decide whether to route automatically or send the message to a human. Its configured Gemini chat client also reads `GEMINI_API_KEY`.
 
@@ -137,12 +138,11 @@ The `rag-hybrid` and `rag-reranking` recipes require `RagIngestionConfig` to run
 
 ## Project layout
 
-Individual Gradle projects follow the same basic structure:
+The root contains `build.gradle`, `settings.gradle`, and the Gradle wrapper. Each application subproject follows the same basic structure:
 
 ```text
 <recipe>/
 ├── build.gradle
-├── settings.gradle
 ├── gradlew
 └── src/
     ├── main/java/
