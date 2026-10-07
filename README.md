@@ -2,7 +2,7 @@
 
 Small, focused Spring AI examples for experimenting with chat clients, tools, memory, retrieval, audio, guardrails, and agent-oriented workflows.
 
-Most recipes are standalone Gradle projects; `mcp-server-oauth` contains separate authorization-server and MCP-server projects, and `jbang-tool-use` runs Java source files with JBang. The examples are intentionally independent so you can open one directory, run it, and inspect the smallest useful implementation.
+Most recipes are standalone Gradle projects; `mcp-server-oauth` contains separate authorization-server and MCP-server projects, and `jbang-tool-use` and `jbang-mcp` run Java source files with JBang. The examples are intentionally independent so you can open one directory, run it, and inspect the smallest useful implementation.
 
 ## Requirements
 
@@ -10,7 +10,7 @@ Most recipes are standalone Gradle projects; `mcp-server-oauth` contains separat
 - An API key for the model provider used by the recipe
 - Docker, for the Redis and Qdrant recipes
 - A local Ollama installation, for recipes that use Ollama
-- JBang, for `jbang-tool-use`
+- JBang, for `jbang-tool-use` and `jbang-mcp`
 
 The examples currently use Spring Boot 4.1.1 and Spring AI 2.0.1. Dependencies are downloaded from Maven Central through Gradle or JBang.
 
@@ -32,7 +32,7 @@ Run a recipe's tests with:
 
 On Windows, use `gradlew.bat` instead of `./gradlew`.
 
-For the JBang recipe, run the Java entry point from its directory:
+For `jbang-tool-use`, run the Java entry point from its directory:
 
 ```bash
 cd jbang-tool-use
@@ -41,6 +41,16 @@ jbang ToolUseApplication.java
 ```
 
 Enter a prompt such as `What is the weather in zipcode 10001?` in the interactive console. The registered weather tool returns sample data.
+
+For `jbang-mcp`, first update the JBang executable, server source, and server configuration directory paths in `jbang-mcp/mcp-client/application.yaml` to match your machine. Then run the client:
+
+```bash
+cd jbang-mcp/mcp-client
+export GEMINI_API_KEY=your-api-key
+jbang McpClientPlainApplication.java
+```
+
+The client launches the JBang MCP server as a subprocess and communicates over stdio. Enter a weather prompt in the interactive console to use the server's sample weather tool.
 
 ## Recipes
 
@@ -86,6 +96,7 @@ Enter a prompt such as `What is the weather in zipcode 10001?` in the interactiv
 | 38 | [`mcp-server-api-key`](mcp-server-api-key)                   | Protect a stateless MCP HTTP server with API key authentication | MCP client, Spring Security, no model provider required |
 | 39 | [`mcp-server-oauth`](mcp-server-oauth)                       | OAuth2 authorization and scope-based access to MCP tools | MCP client, Spring Authorization Server, Spring Security |
 | 40 | [`jbang-tool-use`](jbang-tool-use)                           | Run interactive chat and weather tool calling directly from Java source with JBang | Google Gemini via OpenAI-compatible API, JBang |
+| 41 | [`jbang-mcp`](jbang-mcp)                                     | Run an interactive MCP client and a subprocess weather server with JBang over stdio | Google Gemini via OpenAI-compatible API, JBang, MCP stdio server |
 
 ## Configuration
 
@@ -98,7 +109,7 @@ Model provider API keys are read from environment variables and are intentionall
 | `TYPESAFE_API_KEY` | `typesafe-simple` (defaults to `nothing` for the local endpoint) |
 | `ELEVENLABS_API_KEY` | `voicechat-tts-elevenlabs` |
 
-The exact model and endpoint settings are in each project's `src/main/resources/application.yaml`, or `jbang-tool-use/application.yaml` for the JBang recipe.
+The exact model and endpoint settings are in each project's `src/main/resources/application.yaml`. JBang recipes keep `application.yaml` alongside their Java sources: in `jbang-tool-use/`, `jbang-mcp/mcp-client/`, and `jbang-mcp/mcp-server/`.
 
 The `mcp-stdio-server` recipe enables the MCP stdio transport with `spring.ai.mcp.server.stdio: true` and exposes `get-weather-for-zipcode` using `@McpTool`. The tool returns sample weather data and requires no API key or external weather service.
 
@@ -142,6 +153,8 @@ Individual Gradle projects follow the same basic structure:
 For `mcp-server-oauth`, this structure appears under both `auth-server/` and `mcp-server/`.
 
 The `jbang-tool-use` recipe keeps its Java sources and `application.yaml` directly in the recipe directory. `ToolUseApplication.java` declares the Java version, BOM, dependencies, and supporting source files through JBang directives.
+
+The `jbang-mcp` recipe uses the same source-based layout in separate `mcp-client/` and `mcp-server/` directories, with `McpClientPlainApplication.java` and `McpStdioServerApplication.java` as their entry points.
 
 The `rag`, `rag-tool`, and `rag-hyde` examples include `src/main/resources/Sagrada.pdf`, an original synthetic knowledge-base PDF created for demonstrating document ingestion and retrieval. Despite the retained filename for compatibility with the examples, it contains no Sagrada game content.
 

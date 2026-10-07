@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: mcp-stdio-server
+
+  main:
+    banner-mode: off
+
+  ai:
+    mcp:
+      server:
+        stdio: true
+
+logging:
+  level:
+    root: error
