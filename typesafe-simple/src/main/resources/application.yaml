@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: typesafe-samples
+
+  ai:
+    typesafe:
+      api-key: ${TYPESAFE_API_KEY:nothing}
+      base-url: http://localhost:11434
+      model: nimble

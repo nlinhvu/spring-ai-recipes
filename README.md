@@ -68,6 +68,7 @@ On Windows, use `gradlew.bat` instead of `./gradlew`.
 | 31 | [`tool-search-tool`](tool-search-tool)                         | Search and select tools dynamically | Google Gemini via OpenAI-compatible API, Lucene |
 | 32 | [`local-modeljars`](local-modeljars)                           | Run a local model packaged as a Model JAR | Local Qwen3 model, Model JARs |
 | 33 | [`memory-session-summarization`](memory-session-summarization) | Session memory with recursive summarization | Google Gemini via OpenAI-compatible API, Spring AI sessions |
+| 34 | [`typesafe-simple`](typesafe-simple)                         | Typed classification and scoring with confidence-based support routing | TypeSafe (local Nimble model), Google Gemini via OpenAI-compatible API |
 
 ## Configuration
 
@@ -77,9 +78,12 @@ API keys are read from environment variables and are intentionally not stored in
 | --- | --- |
 | `OPENAI_API_KEY` | `voicechat-stt`, `voicechat-tts`, and the OpenAI portion of `voicechat-tts-elevenlabs` |
 | `GEMINI_API_KEY` | Gemini-based examples, including recipes using the OpenAI-compatible Gemini endpoint |
+| `TYPESAFE_API_KEY` | `typesafe-simple` (defaults to `nothing` for the local endpoint) |
 | `ELEVENLABS_API_KEY` | `voicechat-tts-elevenlabs` |
 
 The exact model and endpoint settings are in each recipe's `src/main/resources/application.yaml`.
+
+The `typesafe-simple` recipe uses a local TypeSafe endpoint at `http://localhost:11434` with the `nimble` model. It classifies a support message by urgency and department, scores customer frustration, and uses department confidence to decide whether to route automatically or send the message to a human. Its configured Gemini chat client also reads `GEMINI_API_KEY`.
 
 For local services, start the service from the recipe directory before launching the application:
 
