@@ -69,6 +69,7 @@ On Windows, use `gradlew.bat` instead of `./gradlew`.
 | 32 | [`local-modeljars`](local-modeljars)                           | Run a local model packaged as a Model JAR | Local Qwen3 model, Model JARs |
 | 33 | [`memory-session-summarization`](memory-session-summarization) | Session memory with recursive summarization | Google Gemini via OpenAI-compatible API, Spring AI sessions |
 | 34 | [`typesafe-simple`](typesafe-simple)                         | Typed classification and scoring with confidence-based support routing | TypeSafe (local Nimble model), Google Gemini via OpenAI-compatible API |
+| 35 | [`mcp-stdio-server`](mcp-stdio-server)                       | Expose an annotated weather tool through an MCP server over standard input/output | MCP client, no model provider required |
 
 ## Configuration
 
@@ -82,6 +83,8 @@ API keys are read from environment variables and are intentionally not stored in
 | `ELEVENLABS_API_KEY` | `voicechat-tts-elevenlabs` |
 
 The exact model and endpoint settings are in each recipe's `src/main/resources/application.yaml`.
+
+The `mcp-stdio-server` recipe enables the MCP stdio transport with `spring.ai.mcp.server.stdio: true` and exposes `get-weather-for-zipcode` using `@McpTool`. The tool returns sample weather data and requires no API key or external weather service.
 
 The `typesafe-simple` recipe uses a local TypeSafe endpoint at `http://localhost:11434` with the `nimble` model. It classifies a support message by urgency and department, scores customer frustration, and uses department confidence to decide whether to route automatically or send the message to a human. Its configured Gemini chat client also reads `GEMINI_API_KEY`.
 
