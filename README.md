@@ -2,7 +2,7 @@
 
 Small, focused Spring AI examples for experimenting with chat clients, tools, memory, retrieval, audio, guardrails, and agent-oriented workflows.
 
-Each recipe is a standalone Gradle project. The examples are intentionally independent so you can open one directory, run it, and inspect the smallest useful implementation.
+Most recipes are standalone Gradle projects; `mcp-server-oauth` contains separate authorization-server and MCP-server projects. The examples are intentionally independent so you can open one directory, run it, and inspect the smallest useful implementation.
 
 ## Requirements
 
@@ -73,10 +73,11 @@ On Windows, use `gradlew.bat` instead of `./gradlew`.
 | 36 | [`mcp-http-server`](mcp-http-server)                         | Expose an annotated weather tool through a stateless MCP server over HTTP | MCP client, no model provider required |
 | 37 | [`mcp-client-plain`](mcp-client-plain)                       | Interactive chat with MCP tools registered through a ToolCallbackProvider | Google Gemini via OpenAI-compatible API, MCP HTTP server |
 | 38 | [`mcp-server-api-key`](mcp-server-api-key)                   | Protect a stateless MCP HTTP server with API key authentication | MCP client, Spring Security, no model provider required |
+| 39 | [`mcp-server-oauth`](mcp-server-oauth)                       | OAuth2 authorization and scope-based access to MCP tools | MCP client, Spring Authorization Server, Spring Security |
 
 ## Configuration
 
-API keys are read from environment variables and are intentionally not stored in the repository:
+Model provider API keys are read from environment variables and are intentionally not stored in the repository:
 
 | Variable | Used by |
 | --- | --- |
@@ -95,6 +96,8 @@ The `mcp-client-plain` recipe connects to `mcp-http-server` at `http://localhost
 
 The `mcp-server-api-key` recipe exposes the sample weather tool at `http://localhost:3000/mcp` using stateless Streamable HTTP and requires API key authentication through Spring Security. Its `SecurityConfig` defines an in-memory demo key; send `X-MCP-API-KEY: ApiKeyId.Secret` on MCP requests, including initialization. The `mcp-client-plain` recipe includes a request customizer that sends this header. Run `mcp-server-api-key` in place of `mcp-http-server`, since both use port `3000`.
 
+The `mcp-server-oauth` recipe contains two Gradle projects. Start `auth-server` on port `9999`, then `mcp-server` on port `3000`, using each project's `./gradlew bootRun` in separate terminals. The MCP server uses stateless Streamable HTTP at `http://localhost:3000/mcp` and validates JWTs issued by `http://localhost:9999`; its weather tool requires the `meteorology` scope. The authorization server includes demo client credentials `myclient` / `mysecret`, user credentials `cloud` / `pw`, and MCP Inspector callback URLs on port `6274`. Configure an OAuth-capable MCP client to request the `meteorology` scope and send its access token as an `Authorization: Bearer <access-token>` header. Run this MCP server in place of the other MCP HTTP server recipes, which also use port `3000`.
+
 The `typesafe-simple` recipe uses a local TypeSafe endpoint at `http://localhost:11434` with the `nimble` model. It classifies a support message by urgency and department, scores customer frustration, and uses department confidence to decide whether to route automatically or send the message to a human. Its configured Gemini chat client also reads `GEMINI_API_KEY`.
 
 For local services, start the service from the recipe directory before launching the application:
@@ -111,7 +114,7 @@ The `rag-hybrid` and `rag-reranking` recipes require `RagIngestionConfig` to run
 
 ## Project layout
 
-Every recipe follows the same basic structure:
+Individual Gradle projects follow the same basic structure:
 
 ```text
 <recipe>/
@@ -123,6 +126,8 @@ Every recipe follows the same basic structure:
     ├── main/resources/application.yaml
     └── test/java/
 ```
+
+For `mcp-server-oauth`, this structure appears under both `auth-server/` and `mcp-server/`.
 
 The `rag`, `rag-tool`, and `rag-hyde` examples include `src/main/resources/Sagrada.pdf`, an original synthetic knowledge-base PDF created for demonstrating document ingestion and retrieval. Despite the retained filename for compatibility with the examples, it contains no Sagrada game content.
 

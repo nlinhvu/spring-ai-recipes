@@ -1,0 +1,17 @@
+server:
+  port: 3000
+
+spring:
+  application:
+    name: mcp-server
+
+  ai:
+    mcp:
+      server:
+        protocol: stateless
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:9999
