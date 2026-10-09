@@ -41,6 +41,12 @@ subprojects {
     }
 
     repositories {
+        mavenLocal {
+            content {
+                includeModule 'org.springaicommunity', 'spring-ai-inspector-starter'
+                includeModule 'org.springaicommunity', 'spring-ai-inspector-parent'
+            }
+        }
         mavenCentral()
     }
 
@@ -67,6 +73,7 @@ subprojects {
             dependency "com.skillsjars:anthropics__skills__pdf:${rootProject.ext.pdfSkillsVersion}"
             dependency "com.skillsjars:browser-use__browser-use__remote-browser:${rootProject.ext.browserSkillsVersion}"
             dependency "javazoom:jlayer:${rootProject.ext.jlayerVersion}"
+            dependency 'org.springaicommunity:spring-ai-inspector-starter:0.0.1-SNAPSHOT'
         }
     }
 
