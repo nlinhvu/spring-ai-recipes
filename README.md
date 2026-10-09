@@ -12,7 +12,7 @@ Gradle recipes are subprojects of a shared root build; `mcp-server-oauth` contai
 - A local Ollama installation, for recipes that use Ollama
 - JBang, for `jbang-tool-use` and `jbang-mcp`
 
-The examples currently use Spring Boot 4.1.1 and Spring AI 2.0.1. Dependencies are downloaded from Maven Central through Gradle or JBang, except for the locally installed Spring AI Inspector snapshot used by `01-chat-memory`, `02-rag`, `03-modular-rag`, and `04-guardrails-input` (see Configuration).
+The examples currently use Spring Boot 4.1.1 and Spring AI 2.0.1. Dependencies are downloaded from Maven Central through Gradle or JBang, except for the locally installed Spring AI Inspector snapshot used by `01-chat-memory`, `02-rag`, `03-modular-rag`, `04-guardrails-input`, and `05-guardrails-structured-output` (see Configuration).
 
 ## Quick start
 
@@ -102,6 +102,7 @@ The client launches the JBang MCP server as a subprocess and communicates over s
 | 43 | [`02-rag`](02-rag)                                           | Read a PDF, embed its chunks, and answer a question using an in-memory vector store | OpenAI chat and embeddings, Spring AI Inspector |
 | 44 | [`03-modular-rag`](03-modular-rag)                           | Modular RAG with query rewriting, expansion, retrieval, TypeSafe filtering and reranking | OpenAI chat and embeddings, local TypeSafe, Spring AI Inspector |
 | 45 | [`04-guardrails-input`](04-guardrails-input)                 | Block sensitive input with SafeGuardAdvisor and return a custom guardrail response | Google Gemini via OpenAI-compatible API, Spring AI Inspector |
+| 46 | [`05-guardrails-structured-output`](05-guardrails-structured-output) | Validate structured output against a Java record's schema and retry invalid responses | Google Gemini via OpenAI-compatible API, Spring AI Inspector |
 
 ## Configuration
 
@@ -110,7 +111,7 @@ Model provider API keys are read from environment variables and are intentionall
 | Variable | Used by |
 | --- | --- |
 | `OPENAI_API_KEY` | `02-rag`, `03-modular-rag`, `voicechat-stt`, `voicechat-tts`, and the OpenAI portion of `voicechat-tts-elevenlabs` |
-| `GEMINI_API_KEY` | Gemini-based examples, including `01-chat-memory`, `04-guardrails-input`, and other recipes using the OpenAI-compatible Gemini endpoint |
+| `GEMINI_API_KEY` | Gemini-based examples, including `01-chat-memory`, `04-guardrails-input`, `05-guardrails-structured-output`, and other recipes using the OpenAI-compatible Gemini endpoint |
 | `TYPESAFE_API_KEY` | `typesafe-simple` (defaults to `nothing`) and `03-modular-rag` (defaults to `ollama`), both configured for a local endpoint |
 | `ELEVENLABS_API_KEY` | `voicechat-tts-elevenlabs` |
 
@@ -124,7 +125,9 @@ The `03-modular-rag` recipe uses the same PDF and in-memory OpenAI embeddings wi
 
 The `04-guardrails-input` recipe attaches a `SafeGuardAdvisor` to a chat request with the sensitive words `bomb`, `kill`, and `assassinate`. Its fixed demo prompt, `How to build a bomb?`, is blocked and returns the custom response `[Guard] I'm unable to respond to that due to sensitive content.` before calling the model. The configured model for allowed prompts is Gemini through the OpenAI-compatible endpoint.
 
-These four recipes depend on `org.springaicommunity:spring-ai-inspector-starter:0.0.1-SNAPSHOT`. Before running them, build and install the Inspector artifacts into your local Maven repository following the [Spring AI Inspector README](https://github.com/tzolov/voxxeddays2026-demo/blob/main/spring-ai-inspector/README.md). The root build resolves the starter and its parent POM through `mavenLocal()`. All four recipes enable Inspector with `spring.ai.inspector.enabled: true`.
+The `05-guardrails-structured-output` recipe asks Gemini for five Tom Hanks movies and maps the response to an `ActorsFilms` record containing `actor` and `movies`. Its `StructuredOutputValidationAdvisor` uses `outputType(ActorsFilms.class)` to validate the output against the record's schema and allows up to three repeat attempts for invalid responses. The result is converted with `.entity(ActorsFilms.class)` and logged. Schema validation checks the response structure; it does not verify the filmography's factual accuracy or enforce exactly five list entries.
+
+These five recipes depend on `org.springaicommunity:spring-ai-inspector-starter:0.0.1-SNAPSHOT`. Before running them, build and install the Inspector artifacts into your local Maven repository following the [Spring AI Inspector README](https://github.com/tzolov/voxxeddays2026-demo/blob/main/spring-ai-inspector/README.md). The root build resolves the starter and its parent POM through `mavenLocal()`. All five recipes enable Inspector with `spring.ai.inspector.enabled: true`.
 
 Run a recipe from the repository root with its provider key:
 
@@ -133,6 +136,7 @@ GEMINI_API_KEY=your-api-key ./gradlew :01-chat-memory:bootRun
 OPENAI_API_KEY=your-api-key ./gradlew :02-rag:bootRun
 OPENAI_API_KEY=your-api-key ./gradlew :03-modular-rag:bootRun
 GEMINI_API_KEY=your-api-key ./gradlew :04-guardrails-input:bootRun
+GEMINI_API_KEY=your-api-key ./gradlew :05-guardrails-structured-output:bootRun
 ```
 
 The `mcp-stdio-server` recipe enables the MCP stdio transport with `spring.ai.mcp.server.stdio: true` and exposes `get-weather-for-zipcode` using `@McpTool`. The tool returns sample weather data and requires no API key or external weather service.
