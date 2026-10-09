@@ -12,7 +12,7 @@ Gradle recipes are subprojects of a shared root build; `mcp-server-oauth` contai
 - A local Ollama installation, for recipes that use Ollama
 - JBang, for `jbang-tool-use` and `jbang-mcp`
 
-The examples currently use Spring Boot 4.1.1 and Spring AI 2.0.1. Dependencies are downloaded from Maven Central through Gradle or JBang, except for the locally installed Spring AI Inspector snapshot used by `01-chat-memory`, `02-rag`, and `03-modular-rag` (see Configuration).
+The examples currently use Spring Boot 4.1.1 and Spring AI 2.0.1. Dependencies are downloaded from Maven Central through Gradle or JBang, except for the locally installed Spring AI Inspector snapshot used by `01-chat-memory`, `02-rag`, `03-modular-rag`, and `04-guardrails-input` (see Configuration).
 
 ## Quick start
 
@@ -101,6 +101,7 @@ The client launches the JBang MCP server as a subprocess and communicates over s
 | 42 | [`01-chat-memory`](01-chat-memory)                           | Remember a name across two prompts using a message window and a conversation ID | Google Gemini via OpenAI-compatible API, Spring AI Inspector |
 | 43 | [`02-rag`](02-rag)                                           | Read a PDF, embed its chunks, and answer a question using an in-memory vector store | OpenAI chat and embeddings, Spring AI Inspector |
 | 44 | [`03-modular-rag`](03-modular-rag)                           | Modular RAG with query rewriting, expansion, retrieval, TypeSafe filtering and reranking | OpenAI chat and embeddings, local TypeSafe, Spring AI Inspector |
+| 45 | [`04-guardrails-input`](04-guardrails-input)                 | Block sensitive input with SafeGuardAdvisor and return a custom guardrail response | Google Gemini via OpenAI-compatible API, Spring AI Inspector |
 
 ## Configuration
 
@@ -109,7 +110,7 @@ Model provider API keys are read from environment variables and are intentionall
 | Variable | Used by |
 | --- | --- |
 | `OPENAI_API_KEY` | `02-rag`, `03-modular-rag`, `voicechat-stt`, `voicechat-tts`, and the OpenAI portion of `voicechat-tts-elevenlabs` |
-| `GEMINI_API_KEY` | Gemini-based examples, including `01-chat-memory` and other recipes using the OpenAI-compatible Gemini endpoint |
+| `GEMINI_API_KEY` | Gemini-based examples, including `01-chat-memory`, `04-guardrails-input`, and other recipes using the OpenAI-compatible Gemini endpoint |
 | `TYPESAFE_API_KEY` | `typesafe-simple` (defaults to `nothing`) and `03-modular-rag` (defaults to `ollama`), both configured for a local endpoint |
 | `ELEVENLABS_API_KEY` | `voicechat-tts-elevenlabs` |
 
@@ -121,7 +122,9 @@ The `02-rag` recipe reads the bundled Hurricane Milton PDF with `PagePdfDocument
 
 The `03-modular-rag` recipe uses the same PDF and in-memory OpenAI embeddings with `RetrievalAugmentationAdvisor`. Its pipeline rewrites the question, expands it into multiple queries, retrieves similar chunks, filters and reranks them using TypeSafe's `JevDocumentFilter` and `JevDocumentReranker`, then augments the final prompt. It prints retrieval queries and document scores. Like `02-rag`, it embeds the PDF on every startup. Start the configured local TypeSafe endpoint at `http://localhost:11434` with the `nimble` model before running it; `TYPESAFE_API_KEY` defaults to the placeholder `ollama`. Its managed executor uses virtual threads, enabled in `application.yml`.
 
-These three recipes depend on `org.springaicommunity:spring-ai-inspector-starter:0.0.1-SNAPSHOT`. Before running them, build and install the Inspector artifacts into your local Maven repository following the [Spring AI Inspector README](https://github.com/tzolov/voxxeddays2026-demo/blob/main/spring-ai-inspector/README.md). The root build resolves the starter and its parent POM through `mavenLocal()`. All three recipes enable Inspector with `spring.ai.inspector.enabled: true`.
+The `04-guardrails-input` recipe attaches a `SafeGuardAdvisor` to a chat request with the sensitive words `bomb`, `kill`, and `assassinate`. Its fixed demo prompt, `How to build a bomb?`, is blocked and returns the custom response `[Guard] I'm unable to respond to that due to sensitive content.` before calling the model. The configured model for allowed prompts is Gemini through the OpenAI-compatible endpoint.
+
+These four recipes depend on `org.springaicommunity:spring-ai-inspector-starter:0.0.1-SNAPSHOT`. Before running them, build and install the Inspector artifacts into your local Maven repository following the [Spring AI Inspector README](https://github.com/tzolov/voxxeddays2026-demo/blob/main/spring-ai-inspector/README.md). The root build resolves the starter and its parent POM through `mavenLocal()`. All four recipes enable Inspector with `spring.ai.inspector.enabled: true`.
 
 Run a recipe from the repository root with its provider key:
 
@@ -129,6 +132,7 @@ Run a recipe from the repository root with its provider key:
 GEMINI_API_KEY=your-api-key ./gradlew :01-chat-memory:bootRun
 OPENAI_API_KEY=your-api-key ./gradlew :02-rag:bootRun
 OPENAI_API_KEY=your-api-key ./gradlew :03-modular-rag:bootRun
+GEMINI_API_KEY=your-api-key ./gradlew :04-guardrails-input:bootRun
 ```
 
 The `mcp-stdio-server` recipe enables the MCP stdio transport with `spring.ai.mcp.server.stdio: true` and exposes `get-weather-for-zipcode` using `@McpTool`. The tool returns sample weather data and requires no API key or external weather service.
