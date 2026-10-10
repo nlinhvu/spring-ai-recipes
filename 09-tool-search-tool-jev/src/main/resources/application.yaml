@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: application
+
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      embedding:
+        model: text-embedding-3-small
+      chat:
+        model: gpt-5-nano
+
+    typesafe:
+      api-key: ${TYPESAFE_API_KEY:ollama}
+      base-url: http://localhost:11434
+      model: nimble
+
+    inspector:
+      enabled: true

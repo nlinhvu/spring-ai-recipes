@@ -48,4 +48,5 @@ include '05-guardrails-structured-output'
 include '06-guardrails-builtin-structured-output'
 include '07-guardrails-jev'
 include '08-tool-search-tool'
+include '09-tool-search-tool-jev'
 

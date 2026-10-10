@@ -12,7 +12,7 @@ Gradle recipes are subprojects of a shared root build; `mcp-server-oauth` contai
 - A local Ollama installation, for recipes that use Ollama
 - JBang, for `jbang-tool-use` and `jbang-mcp`
 
-The examples currently use Spring Boot 4.1.1 and Spring AI 2.0.1. Dependencies are downloaded from Maven Central through Gradle or JBang, except for the locally installed Spring AI Inspector snapshot used by `01-chat-memory`, `02-rag`, `03-modular-rag`, `04-guardrails-input`, `05-guardrails-structured-output`, `06-guardrails-builtin-structured-output`, `07-guardrails-jev`, and `08-tool-search-tool` (see Configuration).
+The examples currently use Spring Boot 4.1.1 and Spring AI 2.0.1. Dependencies are downloaded from Maven Central through Gradle or JBang, except for the locally installed Spring AI Inspector snapshot used by `01-chat-memory`, `02-rag`, `03-modular-rag`, `04-guardrails-input`, `05-guardrails-structured-output`, `06-guardrails-builtin-structured-output`, `07-guardrails-jev`, `08-tool-search-tool`, and `09-tool-search-tool-jev` (see Configuration).
 
 ## Quick start
 
@@ -106,6 +106,7 @@ The client launches the JBang MCP server as a subprocess and communicates over s
 | 47 | [`06-guardrails-builtin-structured-output`](06-guardrails-builtin-structured-output) | Request provider structured output and validate its schema through the entity API | Google Gemini via OpenAI-compatible API, Spring AI Inspector |
 | 48 | [`07-guardrails-jev`](07-guardrails-jev)                     | Screen input and output with TypeSafe Jev guardrails and report PASS, BLOCK, or SUPPORT outcomes | Google Gemini via OpenAI-compatible API, local TypeSafe, Spring AI Inspector |
 | 49 | [`08-tool-search-tool`](08-tool-search-tool)                 | Discover tools dynamically with ToolSearchToolCallingAdvisor and a Lucene tool index | OpenAI, Lucene, Spring AI Inspector |
+| 50 | [`09-tool-search-tool-jev`](09-tool-search-tool-jev)         | Discover tools dynamically with ToolSearchToolCallingAdvisor and TypeSafe Jev applicability and relevance scoring | OpenAI, local TypeSafe, Spring AI Inspector |
 
 ## Configuration
 
@@ -113,9 +114,9 @@ Model provider API keys are read from environment variables and are intentionall
 
 | Variable | Used by |
 | --- | --- |
-| `OPENAI_API_KEY` | `02-rag`, `03-modular-rag`, `08-tool-search-tool`, `voicechat-stt`, `voicechat-tts`, and the OpenAI portion of `voicechat-tts-elevenlabs` |
+| `OPENAI_API_KEY` | `02-rag`, `03-modular-rag`, `08-tool-search-tool`, `09-tool-search-tool-jev`, `voicechat-stt`, `voicechat-tts`, and the OpenAI portion of `voicechat-tts-elevenlabs` |
 | `GEMINI_API_KEY` | Gemini-based examples, including `01-chat-memory`, `04-guardrails-input`, `05-guardrails-structured-output`, `06-guardrails-builtin-structured-output`, `07-guardrails-jev`, and other recipes using the OpenAI-compatible Gemini endpoint |
-| `TYPESAFE_API_KEY` | `typesafe-simple` (defaults to `nothing`), `03-modular-rag`, and `07-guardrails-jev` (the latter two default to `ollama`), all configured for a local endpoint |
+| `TYPESAFE_API_KEY` | `typesafe-simple` (defaults to `nothing`), `03-modular-rag`, `07-guardrails-jev`, and `09-tool-search-tool-jev` (the latter three default to `ollama`), all configured for a local endpoint |
 | `ELEVENLABS_API_KEY` | `voicechat-tts-elevenlabs` |
 
 The exact model and endpoint settings are in each project's `src/main/resources/application.yaml` or `application.yml`. JBang recipes keep `application.yaml` alongside their Java sources: in `jbang-tool-use/`, `jbang-mcp/mcp-client/`, and `jbang-mcp/mcp-server/`.
@@ -136,7 +137,9 @@ The `07-guardrails-jev` recipe configures `JevGuardrailAdvisor` with input and o
 
 The `08-tool-search-tool` recipe registers weather, clothing-shop, current-time, and dummy tools, then uses `ToolSearchToolCallingAdvisor` with `LuceneToolIndex` to discover relevant tools dynamically. It supplies a conversation ID and disables reference-tool name accumulation. The demo asks what to wear in Landsmeer and which clothing shops are open, using OpenAI `gpt-5-nano`. Weather and shop results are sample data; the time tool returns the machine's local date and time. Tool search uses Lucene rather than embeddings, and requires no external vector database.
 
-These eight recipes depend on `org.springaicommunity:spring-ai-inspector-starter:0.0.1-SNAPSHOT`. Before running them, build and install the Inspector artifacts into your local Maven repository following the [Spring AI Inspector README](https://github.com/tzolov/voxxeddays2026-demo/blob/main/spring-ai-inspector/README.md). The root build resolves the starter and its parent POM through `mavenLocal()`. All eight recipes enable Inspector with `spring.ai.inspector.enabled: true`.
+The `09-tool-search-tool-jev` recipe uses `ToolSearchToolCallingAdvisor` with TypeSafe's `JevToolIndex`, configured with an applicability threshold of `0.5` and minimum relevance of `0.05`. It registers the same weather, clothing-shop, current-time, and dummy tools as `08-tool-search-tool`, supplies a conversation ID, and disables reference-tool name accumulation. The demo asks what to wear in Landsmeer and which shops are open, using OpenAI `gpt-5-nano`. Weather and shop results are sample data; the time tool returns the machine's local date and time. Start the configured local TypeSafe endpoint at `http://localhost:11434` with the `nimble` model before running it; `TYPESAFE_API_KEY` defaults to the placeholder `ollama`.
+
+These nine recipes depend on `org.springaicommunity:spring-ai-inspector-starter:0.0.1-SNAPSHOT`. Before running them, build and install the Inspector artifacts into your local Maven repository following the [Spring AI Inspector README](https://github.com/tzolov/voxxeddays2026-demo/blob/main/spring-ai-inspector/README.md). The root build resolves the starter and its parent POM through `mavenLocal()`. All nine recipes enable Inspector with `spring.ai.inspector.enabled: true`.
 
 Run a recipe from the repository root with its provider key:
 
@@ -149,6 +152,7 @@ GEMINI_API_KEY=your-api-key ./gradlew :05-guardrails-structured-output:bootRun
 GEMINI_API_KEY=your-api-key ./gradlew :06-guardrails-builtin-structured-output:bootRun
 GEMINI_API_KEY=your-api-key ./gradlew :07-guardrails-jev:bootRun
 OPENAI_API_KEY=your-api-key ./gradlew :08-tool-search-tool:bootRun
+OPENAI_API_KEY=your-api-key ./gradlew :09-tool-search-tool-jev:bootRun
 ```
 
 The `mcp-stdio-server` recipe enables the MCP stdio transport with `spring.ai.mcp.server.stdio: true` and exposes `get-weather-for-zipcode` using `@McpTool`. The tool returns sample weather data and requires no API key or external weather service.
