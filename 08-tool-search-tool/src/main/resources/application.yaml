@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: application
+
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      embedding:
+        model: text-embedding-3-small
+      chat:
+        model: gpt-5-nano
+
+    inspector:
+      enabled: true
