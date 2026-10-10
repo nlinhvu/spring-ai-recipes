@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: application
+
+  threads:
+    virtual:
+      enabled: true
+
+  ai:
+    openai:
+      api-key: ${GEMINI_API_KEY:}
+      base-url: https://generativelanguage.googleapis.com/v1beta/openai
+      chat:
+        model: gemini-3.1-flash-lite
+
+    typesafe:
+      api-key: ${TYPESAFE_API_KEY:ollama}
+      base-url: http://localhost:11434
+      model: nimble
+
+    inspector:
+      enabled: true
