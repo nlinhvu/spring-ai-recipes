@@ -50,4 +50,5 @@ include '07-guardrails-jev'
 include '08-tool-search-tool'
 include '09-tool-search-tool-jev'
 include '10-as-a-judge-llm'
+include '11-as-a-judge-jev'
 
