@@ -12,7 +12,7 @@ Gradle recipes are subprojects of a shared root build; `mcp-server-oauth` contai
 - A local Ollama installation, for recipes that use Ollama
 - JBang, for `jbang-tool-use` and `jbang-mcp`
 
-The examples currently use Spring Boot 4.1.1 and Spring AI 2.0.1. Dependencies are downloaded from Maven Central through Gradle or JBang, except for the locally installed Spring AI Inspector snapshot used by `01-chat-memory`, `02-rag`, `03-modular-rag`, `04-guardrails-input`, `05-guardrails-structured-output`, `06-guardrails-builtin-structured-output`, `07-guardrails-jev`, `08-tool-search-tool`, `09-tool-search-tool-jev`, `10-as-a-judge-llm`, `11-as-a-judge-jev`, `12-tool-argument-augmenter`, `13-skills`, and `14-todo-write` (see Configuration).
+The examples currently use Spring Boot 4.1.1 and Spring AI 2.0.1. Dependencies are downloaded from Maven Central through Gradle or JBang, except for the locally installed Spring AI Inspector snapshot used by `01-chat-memory`, `02-rag`, `03-modular-rag`, `04-guardrails-input`, `05-guardrails-structured-output`, `06-guardrails-builtin-structured-output`, `07-guardrails-jev`, `08-tool-search-tool`, `09-tool-search-tool-jev`, `10-as-a-judge-llm`, `11-as-a-judge-jev`, `12-tool-argument-augmenter`, `13-skills`, `14-todo-write`, and `15-ask-user-question` (see Configuration).
 
 ## Quick start
 
@@ -112,6 +112,7 @@ The client launches the JBang MCP server as a subprocess and communicates over s
 | 53 | [`12-tool-argument-augmenter`](12-tool-argument-augmenter)   | Add structured metadata to tool arguments, consume it, and remove it before tool execution | Google Gemini via OpenAI-compatible API, Spring AI Inspector |
 | 54 | [`13-skills`](13-skills)                                   | Load local and JAR-packaged skills and combine them with shell, file-system, and web-fetch tools | Google Gemini via OpenAI-compatible API, Spring AI Agent Utils, SkillsJars, Spring AI Inspector |
 | 55 | [`14-todo-write`](14-todo-write)                           | Track tool-driven tasks with TodoWriteTool and publish progress through Spring application events | Google Gemini via OpenAI-compatible API, Spring AI Agent Utils, Spring AI Inspector |
+| 56 | [`15-ask-user-question`](15-ask-user-question)               | Gather website requirements through AskUserQuestionTool and a command-line question handler | Google Gemini via OpenAI-compatible API, Spring AI Agent Utils, Spring AI Inspector |
 
 ## Configuration
 
@@ -120,7 +121,7 @@ Model provider API keys are read from environment variables and are intentionall
 | Variable | Used by |
 | --- | --- |
 | `OPENAI_API_KEY` | `02-rag`, `03-modular-rag`, `08-tool-search-tool`, `09-tool-search-tool-jev`, `voicechat-stt`, `voicechat-tts`, and the OpenAI portion of `voicechat-tts-elevenlabs` |
-| `GEMINI_API_KEY` | Gemini-based examples, including `01-chat-memory`, `04-guardrails-input`, `05-guardrails-structured-output`, `06-guardrails-builtin-structured-output`, `07-guardrails-jev`, `10-as-a-judge-llm`, `11-as-a-judge-jev`, `12-tool-argument-augmenter`, `13-skills`, `14-todo-write`, and other recipes using the OpenAI-compatible Gemini endpoint |
+| `GEMINI_API_KEY` | Gemini-based examples, including `01-chat-memory`, `04-guardrails-input`, `05-guardrails-structured-output`, `06-guardrails-builtin-structured-output`, `07-guardrails-jev`, `10-as-a-judge-llm`, `11-as-a-judge-jev`, `12-tool-argument-augmenter`, `13-skills`, `14-todo-write`, `15-ask-user-question`, and other recipes using the OpenAI-compatible Gemini endpoint |
 | `TYPESAFE_API_KEY` | `typesafe-simple` (defaults to `nothing`), `03-modular-rag`, `07-guardrails-jev`, `09-tool-search-tool-jev`, and `11-as-a-judge-jev` (the latter four default to `ollama`), all configured for a local endpoint |
 | `ELEVENLABS_API_KEY` | `voicechat-tts-elevenlabs` |
 
@@ -158,7 +159,9 @@ The `13-skills` recipe loads skills with `SkillsTool` from `classpath:/.agent/sk
 
 The `14-todo-write` recipe registers `TodoWriteTool` and `ShellTools` with a Gemini chat client. Its demo prompt asks the model to create `hello_world.txt` in a temporary directory and then remove it. The todo event handler publishes a `TodoUpdateEvent` through Spring's `ApplicationEventPublisher`, and a listener prints the completed-task count, percentage, and each task's status. Shell commands run on the machine hosting the recipe.
 
-These fourteen recipes depend on `org.springaicommunity:spring-ai-inspector-starter:0.0.1-SNAPSHOT`. Before running them, build and install the Inspector artifacts into your local Maven repository following the [Spring AI Inspector README](https://github.com/tzolov/voxxeddays2026-demo/blob/main/spring-ai-inspector/README.md). The root build resolves the starter and its parent POM through `mavenLocal()`. All fourteen recipes enable Inspector with `spring.ai.inspector.enabled: true`.
+The `15-ask-user-question` recipe registers `AskUserQuestionTool` with a `CommandLineQuestionHandler` and disables answer validation with `answersValidation(false)`. Its fixed prompt asks Gemini to gather website requirements by asking three questions. The question handler handles user replies through the console, and the application logs the final answer.
+
+These fifteen recipes depend on `org.springaicommunity:spring-ai-inspector-starter:0.0.1-SNAPSHOT`. Before running them, build and install the Inspector artifacts into your local Maven repository following the [Spring AI Inspector README](https://github.com/tzolov/voxxeddays2026-demo/blob/main/spring-ai-inspector/README.md). The root build resolves the starter and its parent POM through `mavenLocal()`. All fifteen recipes enable Inspector with `spring.ai.inspector.enabled: true`.
 
 Run a recipe from the repository root with its provider key:
 
@@ -177,6 +180,7 @@ GEMINI_API_KEY=your-api-key ./gradlew :11-as-a-judge-jev:bootRun
 GEMINI_API_KEY=your-api-key ./gradlew :12-tool-argument-augmenter:bootRun
 GEMINI_API_KEY=your-api-key ./gradlew :13-skills:bootRun
 GEMINI_API_KEY=your-api-key ./gradlew :14-todo-write:bootRun
+GEMINI_API_KEY=your-api-key ./gradlew :15-ask-user-question:bootRun
 ```
 
 The `mcp-stdio-server` recipe enables the MCP stdio transport with `spring.ai.mcp.server.stdio: true` and exposes `get-weather-for-zipcode` using `@McpTool`. The tool returns sample weather data and requires no API key or external weather service.
