@@ -1,0 +1,77 @@
+package dev.linhvu.example;
+
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springaicommunity.agent.tools.BraveWebSearchTool;
+import org.springaicommunity.agent.tools.FileSystemTools;
+import org.springaicommunity.agent.tools.ShellTools;
+import org.springaicommunity.agent.tools.SkillsTool;
+import org.springaicommunity.agent.tools.SmartWebFetchTool;
+
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+import org.springframework.core.io.Resource;
+
+@SpringBootApplication
+public class Application {
+
+	private static final Logger log = LoggerFactory.getLogger(Application.class);
+
+	public static void main(String[] args) {
+		SpringApplication.run(Application.class, args);
+	}
+
+	@Bean
+	public ApplicationRunner runner(ChatClient.Builder chatClientBuilder,
+			@Value("${agent.skills.dirs:Unknown}") List<Resource> agentSkillsDirs,
+			@Value("${BRAVE_API_KEY:#{null}}") String braveApiKey) {
+		return args -> {
+
+			ChatClient chatClient = chatClientBuilder // @formatter:off
+					.defaultSystem("Always use the available skills to assist the user in their requests.")
+
+					.defaultTools(
+							// Skills tool
+							SkillsTool.builder().addSkillsResources(agentSkillsDirs).build(),
+
+							//Bash execution tool
+							ShellTools.builder().build(),// built-in shell tools
+
+							// Read, Write and Edit files tool
+							FileSystemTools.builder().build(),// built-in file system tools
+
+							// Smart web fetch tool
+							SmartWebFetchTool.builder(chatClientBuilder.clone().build()).build()
+
+							// Brave web search tool
+//							BraveWebSearchTool.builder(braveApiKey)
+//									.resultCount(15).build()
+					)
+					.defaultAdvisors(
+							// Custom logging advisor
+							MyLoggingAdvisor.builder()
+									.build())
+					.build();
+
+			String answer = chatClient.prompt("""
+					What skills do you have and how can you help me with my requests?
+					""").call().content();
+
+			log.info("Supported Skills: {}", answer);
+
+			answer = chatClient.prompt("""
+					Explain reinforcement learning in simple terms and use required skills.
+					Then use the Youtube video https://youtu.be/vXtfdGphr3c?si=xy8U2Al_Um5vE4Jd transcript to support your answer.
+					Use absolute paths for the skills and scripts. Do not ask me for more details.
+					""").call().content();
+
+			log.info("The Answer: {}", answer);
+		};
+	}
+}
