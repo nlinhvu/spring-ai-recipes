@@ -12,7 +12,7 @@ Gradle recipes are subprojects of a shared root build; `mcp-server-oauth` contai
 - A local Ollama installation, for recipes that use Ollama
 - JBang, for `jbang-tool-use` and `jbang-mcp`
 
-The examples currently use Spring Boot 4.1.1 and Spring AI 2.0.1. Dependencies are downloaded from Maven Central through Gradle or JBang, except for the locally installed Spring AI Inspector snapshot used by `01-chat-memory`, `02-rag`, `03-modular-rag`, `04-guardrails-input`, `05-guardrails-structured-output`, `06-guardrails-builtin-structured-output`, `07-guardrails-jev`, `08-tool-search-tool`, `09-tool-search-tool-jev`, `10-as-a-judge-llm`, `11-as-a-judge-jev`, `12-tool-argument-augmenter`, `13-skills`, `14-todo-write`, `15-ask-user-question`, and `16-subagents` (see Configuration).
+The examples currently use Spring Boot 4.1.1 and Spring AI 2.0.1. Dependencies are downloaded from Maven Central through Gradle or JBang, except for the locally installed Spring AI Inspector snapshot used by `01-chat-memory`, `02-rag`, `03-modular-rag`, `04-guardrails-input`, `05-guardrails-structured-output`, `06-guardrails-builtin-structured-output`, `07-guardrails-jev`, `08-tool-search-tool`, `09-tool-search-tool-jev`, `10-as-a-judge-llm`, `11-as-a-judge-jev`, `12-tool-argument-augmenter`, `13-skills`, `14-todo-write`, `15-ask-user-question`, `16-subagents`, and `19-auto-memory` (see Configuration).
 
 ## Quick start
 
@@ -114,6 +114,7 @@ The client launches the JBang MCP server as a subprocess and communicates over s
 | 55 | [`14-todo-write`](14-todo-write)                           | Track tool-driven tasks with TodoWriteTool and publish progress through Spring application events | Google Gemini via OpenAI-compatible API, Spring AI Agent Utils, Spring AI Inspector |
 | 56 | [`15-ask-user-question`](15-ask-user-question)               | Gather website requirements through AskUserQuestionTool and a command-line question handler | Google Gemini via OpenAI-compatible API, Spring AI Agent Utils, Spring AI Inspector |
 | 57 | [`16-subagents`](16-subagents)                             | Delegate tasks through TaskTool to subagents defined in Markdown resources | Google Gemini via OpenAI-compatible API, Spring AI Agent Utils, Spring AI Inspector |
+| 58 | [`19-auto-memory`](19-auto-memory)                         | Combine session history, persistent file-based memory, and background memory consolidation | Google Gemini via OpenAI-compatible API, Spring AI Agent Utils, Spring AI sessions, Spring AI Inspector |
 
 ## Configuration
 
@@ -122,7 +123,7 @@ Model provider API keys are read from environment variables and are intentionall
 | Variable | Used by |
 | --- | --- |
 | `OPENAI_API_KEY` | `02-rag`, `03-modular-rag`, `08-tool-search-tool`, `09-tool-search-tool-jev`, `voicechat-stt`, `voicechat-tts`, and the OpenAI portion of `voicechat-tts-elevenlabs` |
-| `GEMINI_API_KEY` | Gemini-based examples, including `01-chat-memory`, `04-guardrails-input`, `05-guardrails-structured-output`, `06-guardrails-builtin-structured-output`, `07-guardrails-jev`, `10-as-a-judge-llm`, `11-as-a-judge-jev`, `12-tool-argument-augmenter`, `13-skills`, `14-todo-write`, `15-ask-user-question`, `16-subagents`, and other recipes using the OpenAI-compatible Gemini endpoint |
+| `GEMINI_API_KEY` | Gemini-based examples, including `01-chat-memory`, `04-guardrails-input`, `05-guardrails-structured-output`, `06-guardrails-builtin-structured-output`, `07-guardrails-jev`, `10-as-a-judge-llm`, `11-as-a-judge-jev`, `12-tool-argument-augmenter`, `13-skills`, `14-todo-write`, `15-ask-user-question`, `16-subagents`, `19-auto-memory`, and other recipes using the OpenAI-compatible Gemini endpoint |
 | `TYPESAFE_API_KEY` | `typesafe-simple` (defaults to `nothing`), `03-modular-rag`, `07-guardrails-jev`, `09-tool-search-tool-jev`, and `11-as-a-judge-jev` (the latter four default to `ollama`), all configured for a local endpoint |
 | `ELEVENLABS_API_KEY` | `voicechat-tts-elevenlabs` |
 
@@ -164,7 +165,18 @@ The `15-ask-user-question` recipe registers `AskUserQuestionTool` with a `Comman
 
 The `16-subagents` recipe registers `TaskTool` with `ClaudeSubagentReferences` loaded from `classpath:/.agent/agents` and a `ClaudeSubagentType` configured with skills from `classpath:/.agent/skills`. Both resource paths are configurable through `agent.tasks.paths` and `agent.skills.paths`. The resources define `joke-teller` and `history-expert` agents; their chat clients use the configured Gemini model. The main client is instructed to delegate jokes to `joke-teller`, then asks for a weather joke. The joke-teller definition instructs it to tell a cucumber joke ending with `Waka! Waka!`. Brave web search configuration is commented out.
 
-These sixteen recipes depend on `org.springaicommunity:spring-ai-inspector-starter:0.0.1-SNAPSHOT`. Before running them, build and install the Inspector artifacts into your local Maven repository following the [Spring AI Inspector README](https://github.com/tzolov/voxxeddays2026-demo/blob/main/spring-ai-inspector/README.md). The root build resolves the starter and its parent POM through `mavenLocal()`. All sixteen recipes enable Inspector with `spring.ai.inspector.enabled: true`.
+The `19-auto-memory` recipe runs an interactive Gemini chat loop with `SessionMemoryAdvisor` for short-term history, `AutoMemoryToolsAdvisor` for long-term file-based memory, and `AutoDreamAdvisor` for background consolidation through `AutoDreamService`. Session history uses an in-memory repository and resets on restart; memory files persist under `agent.memory.dir`, which defaults to `./19-auto-memory/.agent/mymemories` when launched from the repository root. The demo seeds overlapping memories and a broken index link when `MEMORY.md` is absent, plus a past session for cross-session recall. In-band consolidation is triggered by a message containing `bye` or the first message after 60 seconds of inactivity. The background dream trigger checks `sessionsSinceLastDream() >= 3`; enter `/dream` to run consolidation manually. `agent.user-id` defaults to `cloud`, and Inspector watches the configured memory directory.
+
+Build the executable JAR and run it from the repository root so the interactive loop can read terminal input directly:
+
+```bash
+./gradlew :19-auto-memory:bootJar
+GEMINI_API_KEY=your-api-key java -jar 19-auto-memory/build/libs/19-auto-memory-0.0.1-SNAPSHOT.jar
+```
+
+Enter messages at `USER>` and use Ctrl+C to stop.
+
+These seventeen recipes depend on `org.springaicommunity:spring-ai-inspector-starter:0.0.1-SNAPSHOT`. Before running them, build and install the Inspector artifacts into your local Maven repository following the [Spring AI Inspector README](https://github.com/tzolov/voxxeddays2026-demo/blob/main/spring-ai-inspector/README.md). The root build resolves the starter and its parent POM through `mavenLocal()`. All seventeen recipes enable Inspector with `spring.ai.inspector.enabled: true`.
 
 Run a recipe from the repository root with its provider key:
 

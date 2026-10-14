@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: application
+
+  ai:
+    openai:
+      api-key: ${GEMINI_API_KEY:}
+      base-url: https://generativelanguage.googleapis.com/v1beta/openai
+      chat:
+        model: gemini-3.1-flash-lite
+
+    inspector:
+      enabled: true
+      memory-dirs: ${agent.memory.dir}
+
+agent:
+  memory:
+    dir: ./19-auto-memory/.agent/mymemories
+
+agent.user-id: cloud

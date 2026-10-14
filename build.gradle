@@ -61,6 +61,7 @@ subprojects {
             dependency "org.springaicommunity:spring-ai-agent-utils:${rootProject.ext.agentUtilsVersion}"
             dependency "org.springaicommunity:mcp-server-security-spring-boot:${rootProject.ext.mcpSecurityVersion}"
             dependency "org.springaicommunity:mcp-authorization-server:${rootProject.ext.mcpSecurityVersion}"
+            dependency "org.springaicommunity:spring-ai-session:${rootProject.ext.springAiSessionVersion}"
             dependency "org.springaicommunity:spring-ai-autoconfigure-session:${rootProject.ext.springAiSessionVersion}"
             dependency "org.springaicommunity:spring-ai-starter-typesafe:${rootProject.ext.typeSafeVersion}"
             dependency "org.springaicommunity:typesafe-spring-ai:${rootProject.ext.typeSafeVersion}"
