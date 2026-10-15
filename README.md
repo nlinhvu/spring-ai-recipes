@@ -11,8 +11,9 @@ Gradle recipes are subprojects of a shared root build; `mcp-server-oauth` contai
 - Docker, for the Redis and Qdrant recipes
 - A local Ollama installation, for recipes that use Ollama
 - JBang, for `jbang-tool-use` and `jbang-mcp`
+- Node.js and npm (`npx`), for the exchange-rate MCP server used by `22-bank-support-agent`
 
-The examples currently use Spring Boot 4.1.1 and Spring AI 2.0.1. Dependencies are downloaded from Maven Central through Gradle or JBang, except for the locally installed Spring AI Inspector snapshot used by `01-chat-memory`, `02-rag`, `03-modular-rag`, `04-guardrails-input`, `05-guardrails-structured-output`, `06-guardrails-builtin-structured-output`, `07-guardrails-jev`, `08-tool-search-tool`, `09-tool-search-tool-jev`, `10-as-a-judge-llm`, `11-as-a-judge-jev`, `12-tool-argument-augmenter`, `13-skills`, `14-todo-write`, `15-ask-user-question`, `16-subagents`, `19-auto-memory`, and `20-memory-session` (see Configuration).
+The examples currently use Spring Boot 4.1.1 and Spring AI 2.0.1. Dependencies are downloaded from Maven Central through Gradle or JBang, except for the locally installed Spring AI Inspector snapshot used by `01-chat-memory`, `02-rag`, `03-modular-rag`, `04-guardrails-input`, `05-guardrails-structured-output`, `06-guardrails-builtin-structured-output`, `07-guardrails-jev`, `08-tool-search-tool`, `09-tool-search-tool-jev`, `10-as-a-judge-llm`, `11-as-a-judge-jev`, `12-tool-argument-augmenter`, `13-skills`, `14-todo-write`, `15-ask-user-question`, `16-subagents`, `19-auto-memory`, `20-memory-session`, and `22-bank-support-agent` (see Configuration).
 
 ## Quick start
 
@@ -116,6 +117,7 @@ The client launches the JBang MCP server as a subprocess and communicates over s
 | 57 | [`16-subagents`](16-subagents)                             | Delegate tasks through TaskTool to subagents defined in Markdown resources | Google Gemini via OpenAI-compatible API, Spring AI Agent Utils, Spring AI Inspector |
 | 58 | [`19-auto-memory`](19-auto-memory)                         | Combine session history, persistent file-based memory, and background memory consolidation | Google Gemini via OpenAI-compatible API, Spring AI Agent Utils, Spring AI sessions, Spring AI Inspector |
 | 59 | [`20-memory-session`](20-memory-session)                   | Remember a name across prompts with SessionMemoryAdvisor and configure sliding-window compaction | Google Gemini via OpenAI-compatible API, Spring AI sessions, Spring AI Inspector |
+| 60 | [`22-bank-support-agent`](22-bank-support-agent)           | Combine typed tool dependencies, session memory, refund skills, MCP exchange rates, and structured support output | Google Gemini via OpenAI-compatible API, H2, Spring AI sessions, MCP stdio server, Spring AI Inspector |
 
 ## Configuration
 
@@ -124,7 +126,7 @@ Model provider API keys are read from environment variables and are intentionall
 | Variable | Used by |
 | --- | --- |
 | `OPENAI_API_KEY` | `02-rag`, `03-modular-rag`, `08-tool-search-tool`, `09-tool-search-tool-jev`, `voicechat-stt`, `voicechat-tts`, and the OpenAI portion of `voicechat-tts-elevenlabs` |
-| `GEMINI_API_KEY` | Gemini-based examples, including `01-chat-memory`, `04-guardrails-input`, `05-guardrails-structured-output`, `06-guardrails-builtin-structured-output`, `07-guardrails-jev`, `10-as-a-judge-llm`, `11-as-a-judge-jev`, `12-tool-argument-augmenter`, `13-skills`, `14-todo-write`, `15-ask-user-question`, `16-subagents`, `19-auto-memory`, `20-memory-session`, and other recipes using the OpenAI-compatible Gemini endpoint |
+| `GEMINI_API_KEY` | Gemini-based examples, including `01-chat-memory`, `04-guardrails-input`, `05-guardrails-structured-output`, `06-guardrails-builtin-structured-output`, `07-guardrails-jev`, `10-as-a-judge-llm`, `11-as-a-judge-jev`, `12-tool-argument-augmenter`, `13-skills`, `14-todo-write`, `15-ask-user-question`, `16-subagents`, `19-auto-memory`, `20-memory-session`, `22-bank-support-agent`, and other recipes using the OpenAI-compatible Gemini endpoint |
 | `TYPESAFE_API_KEY` | `typesafe-simple` (defaults to `nothing`), `03-modular-rag`, `07-guardrails-jev`, `09-tool-search-tool-jev`, and `11-as-a-judge-jev` (the latter four default to `ollama`), all configured for a local endpoint |
 | `ELEVENLABS_API_KEY` | `voicechat-tts-elevenlabs` |
 
@@ -179,7 +181,11 @@ Enter messages at `USER>` and use Ctrl+C to stop.
 
 The `20-memory-session` recipe creates a `DefaultSessionService` backed by `InMemorySessionRepository` and attaches `SessionMemoryAdvisor` to the chat client. It introduces a name, then asks Gemini to recall it, passing the same session ID (`cloud`) through `SessionMemoryAdvisor.SESSION_ID_CONTEXT_KEY` on both requests. The default user ID is also `cloud`. Compaction is configured with `TurnCountTrigger(3)` and `SlidingWindowCompactionStrategy.maxEvents(2)`; the two-prompt demo does not reach the three-turn trigger. Session history is held in memory and resets on restart.
 
-These eighteen recipes depend on `org.springaicommunity:spring-ai-inspector-starter:0.0.1-SNAPSHOT`. Before running them, build and install the Inspector artifacts into your local Maven repository following the [Spring AI Inspector README](https://github.com/tzolov/voxxeddays2026-demo/blob/main/spring-ai-inspector/README.md). The root build resolves the starter and its parent POM through `mavenLocal()`. All eighteen recipes enable Inspector with `spring.ai.inspector.enabled: true`.
+The `22-bank-support-agent` recipe uses an embedded H2 database seeded with customer John (ID `123`, balance `$123.45`) and passes a `SupportDependencies` record to local balance and refund tools through `ToolContext`. It fills the system prompt with the customer name, loads a refund-policy skill from `classpath:/skills`, and shares in-memory session history across four demo questions: account balance, a lost card, a duplicate-charge refund, and the balance in euros. Each response is mapped to `SupportOutput` with `supportAdvice`, `blockCard`, and `risk` fields; `blockCard` is a recommendation, with no card-blocking operation implemented. The refund tool returns sample data.
+
+For currency conversion, the client starts `@cyanheads/exchange-rates-mcp-server@0.4.1` through `npx -y` over stdio, configured in `22-bank-support-agent/src/main/resources/mcp-servers-config.json`. Install Node.js and npm and allow network access for package installation and exchange-rate retrieval. The `McpToolFilter` excludes tools whose names start with `fx_dataframe_`. No external database service is required.
+
+These nineteen recipes depend on `org.springaicommunity:spring-ai-inspector-starter:0.0.1-SNAPSHOT`. Before running them, build and install the Inspector artifacts into your local Maven repository following the [Spring AI Inspector README](https://github.com/tzolov/voxxeddays2026-demo/blob/main/spring-ai-inspector/README.md). The root build resolves the starter and its parent POM through `mavenLocal()`. All nineteen recipes enable Inspector with `spring.ai.inspector.enabled: true`.
 
 Run a recipe from the repository root with its provider key:
 
@@ -201,6 +207,7 @@ GEMINI_API_KEY=your-api-key ./gradlew :14-todo-write:bootRun
 GEMINI_API_KEY=your-api-key ./gradlew :15-ask-user-question:bootRun
 GEMINI_API_KEY=your-api-key ./gradlew :16-subagents:bootRun
 GEMINI_API_KEY=your-api-key ./gradlew :20-memory-session:bootRun
+GEMINI_API_KEY=your-api-key ./gradlew :22-bank-support-agent:bootRun
 ```
 
 The `mcp-stdio-server` recipe enables the MCP stdio transport with `spring.ai.mcp.server.stdio: true` and exposes `get-weather-for-zipcode` using `@McpTool`. The tool returns sample weather data and requires no API key or external weather service.
@@ -260,3 +267,5 @@ This project is licensed under the [MIT License](LICENSE).
 ## Inspiration
 
 This repository is inspired by [habuma/spring-ai-recipes](https://github.com/habuma/spring-ai-recipes), a collection of Spring AI recipe examples.
+
+Additional inspiration comes from [tzolov/voxxeddays2026-demo](https://github.com/tzolov/voxxeddays2026-demo).

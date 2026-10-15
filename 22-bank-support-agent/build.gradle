@@ -1,0 +1,19 @@
+description = '22-bank-support-agent'
+
+dependencies {
+    implementation 'org.springframework.ai:spring-ai-starter-model-openai'
+
+    implementation 'org.springaicommunity:spring-ai-session'
+
+    implementation 'org.springaicommunity:spring-ai-agent-utils'
+
+    implementation 'org.springframework.ai:spring-ai-starter-mcp-client'
+
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+    runtimeOnly 'com.h2database:h2'
+
+    implementation 'org.springaicommunity:spring-ai-inspector-starter'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
