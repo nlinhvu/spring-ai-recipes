@@ -1,0 +1,10 @@
+description = '23-multimodality-5-gemini-image-chat'
+
+dependencies {
+    implementation 'org.springframework.ai:spring-ai-starter-model-google-genai'
+
+    implementation 'org.springaicommunity:spring-ai-inspector-starter'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}

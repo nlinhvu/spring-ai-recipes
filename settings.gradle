@@ -63,4 +63,4 @@ include '23-multimodality:23-multimodality-1-vision-chat'
 include '23-multimodality:23-multimodality-2-image-generation'
 include '23-multimodality:23-multimodality-3-speech-and-transcription'
 include '23-multimodality:23-multimodality-4-audio-chat'
-
+include '23-multimodality:23-multimodality-5-gemini-image-chat'
