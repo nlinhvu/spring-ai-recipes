@@ -1,0 +1,11 @@
+description = '20-memory-session'
+
+dependencies {
+    implementation 'org.springframework.ai:spring-ai-starter-model-openai'
+    implementation 'org.springaicommunity:spring-ai-session'
+
+    implementation 'org.springaicommunity:spring-ai-inspector-starter'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}

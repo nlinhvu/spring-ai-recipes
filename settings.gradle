@@ -57,4 +57,5 @@ include '14-todo-write'
 include '15-ask-user-question'
 include '16-subagents'
 include '19-auto-memory'
+include '20-memory-session'
 
