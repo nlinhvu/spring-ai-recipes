@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: application
+
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      chat:
+        model: gpt-5-mini-2025-08-07
+        temperature: 1.0
+      image:
+        model: gpt-image-1-mini
+
+    inspector:
+      enabled: true
