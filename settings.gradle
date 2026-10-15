@@ -59,4 +59,5 @@ include '16-subagents'
 include '19-auto-memory'
 include '20-memory-session'
 include '22-bank-support-agent'
+include '23-multimodality:23-multimodality-1-vision-chat'
 

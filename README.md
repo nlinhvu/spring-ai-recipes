@@ -13,7 +13,7 @@ Gradle recipes are subprojects of a shared root build; `mcp-server-oauth` contai
 - JBang, for `jbang-tool-use` and `jbang-mcp`
 - Node.js and npm (`npx`), for the exchange-rate MCP server used by `22-bank-support-agent`
 
-The examples currently use Spring Boot 4.1.1 and Spring AI 2.0.1. Dependencies are downloaded from Maven Central through Gradle or JBang, except for the locally installed Spring AI Inspector snapshot used by `01-chat-memory`, `02-rag`, `03-modular-rag`, `04-guardrails-input`, `05-guardrails-structured-output`, `06-guardrails-builtin-structured-output`, `07-guardrails-jev`, `08-tool-search-tool`, `09-tool-search-tool-jev`, `10-as-a-judge-llm`, `11-as-a-judge-jev`, `12-tool-argument-augmenter`, `13-skills`, `14-todo-write`, `15-ask-user-question`, `16-subagents`, `19-auto-memory`, `20-memory-session`, and `22-bank-support-agent` (see Configuration).
+The examples currently use Spring Boot 4.1.1 and Spring AI 2.0.1. Dependencies are downloaded from Maven Central through Gradle or JBang, except for the locally installed Spring AI Inspector snapshot used by `01-chat-memory`, `02-rag`, `03-modular-rag`, `04-guardrails-input`, `05-guardrails-structured-output`, `06-guardrails-builtin-structured-output`, `07-guardrails-jev`, `08-tool-search-tool`, `09-tool-search-tool-jev`, `10-as-a-judge-llm`, `11-as-a-judge-jev`, `12-tool-argument-augmenter`, `13-skills`, `14-todo-write`, `15-ask-user-question`, `16-subagents`, `19-auto-memory`, `20-memory-session`, `22-bank-support-agent`, and `23-multimodality-1-vision-chat` (see Configuration).
 
 ## Quick start
 
@@ -118,6 +118,7 @@ The client launches the JBang MCP server as a subprocess and communicates over s
 | 58 | [`19-auto-memory`](19-auto-memory)                         | Combine session history, persistent file-based memory, and background memory consolidation | Google Gemini via OpenAI-compatible API, Spring AI Agent Utils, Spring AI sessions, Spring AI Inspector |
 | 59 | [`20-memory-session`](20-memory-session)                   | Remember a name across prompts with SessionMemoryAdvisor and configure sliding-window compaction | Google Gemini via OpenAI-compatible API, Spring AI sessions, Spring AI Inspector |
 | 60 | [`22-bank-support-agent`](22-bank-support-agent)           | Combine typed tool dependencies, session memory, refund skills, MCP exchange rates, and structured support output | Google Gemini via OpenAI-compatible API, H2, Spring AI sessions, MCP stdio server, Spring AI Inspector |
+| 61 | [`23-multimodality-1-vision-chat`](23-multimodality/23-multimodality-1-vision-chat) | Send a chart image and a PDF directly as media in chat prompts | Google Gemini via OpenAI-compatible API, Spring AI Inspector |
 
 ## Configuration
 
@@ -126,7 +127,7 @@ Model provider API keys are read from environment variables and are intentionall
 | Variable | Used by |
 | --- | --- |
 | `OPENAI_API_KEY` | `02-rag`, `03-modular-rag`, `08-tool-search-tool`, `09-tool-search-tool-jev`, `voicechat-stt`, `voicechat-tts`, and the OpenAI portion of `voicechat-tts-elevenlabs` |
-| `GEMINI_API_KEY` | Gemini-based examples, including `01-chat-memory`, `04-guardrails-input`, `05-guardrails-structured-output`, `06-guardrails-builtin-structured-output`, `07-guardrails-jev`, `10-as-a-judge-llm`, `11-as-a-judge-jev`, `12-tool-argument-augmenter`, `13-skills`, `14-todo-write`, `15-ask-user-question`, `16-subagents`, `19-auto-memory`, `20-memory-session`, `22-bank-support-agent`, and other recipes using the OpenAI-compatible Gemini endpoint |
+| `GEMINI_API_KEY` | Gemini-based examples, including `01-chat-memory`, `04-guardrails-input`, `05-guardrails-structured-output`, `06-guardrails-builtin-structured-output`, `07-guardrails-jev`, `10-as-a-judge-llm`, `11-as-a-judge-jev`, `12-tool-argument-augmenter`, `13-skills`, `14-todo-write`, `15-ask-user-question`, `16-subagents`, `19-auto-memory`, `20-memory-session`, `22-bank-support-agent`, `23-multimodality-1-vision-chat`, and other recipes using the OpenAI-compatible Gemini endpoint |
 | `TYPESAFE_API_KEY` | `typesafe-simple` (defaults to `nothing`), `03-modular-rag`, `07-guardrails-jev`, `09-tool-search-tool-jev`, and `11-as-a-judge-jev` (the latter four default to `ollama`), all configured for a local endpoint |
 | `ELEVENLABS_API_KEY` | `voicechat-tts-elevenlabs` |
 
@@ -185,7 +186,9 @@ The `22-bank-support-agent` recipe uses an embedded H2 database seeded with cust
 
 For currency conversion, the client starts `@cyanheads/exchange-rates-mcp-server@0.4.1` through `npx -y` over stdio, configured in `22-bank-support-agent/src/main/resources/mcp-servers-config.json`. Install Node.js and npm and allow network access for package installation and exchange-rate retrieval. The `McpToolFilter` excludes tools whose names start with `fx_dataframe_`. No external database service is required.
 
-These nineteen recipes depend on `org.springaicommunity:spring-ai-inspector-starter:0.0.1-SNAPSHOT`. Before running them, build and install the Inspector artifacts into your local Maven repository following the [Spring AI Inspector README](https://github.com/tzolov/voxxeddays2026-demo/blob/main/spring-ai-inspector/README.md). The root build resolves the starter and its parent POM through `mavenLocal()`. All nineteen recipes enable Inspector with `spring.ai.inspector.enabled: true`.
+The `23-multimodality-1-vision-chat` recipe is a nested Gradle project under `23-multimodality/`. It sends two independent multimodal requests to Gemini: a bundled `ticket-sales-per-day.png` chart with a question about the highest-selling day, and a bundled Hurricane Milton PDF with a question about where and when the hurricane made landfall. The resources are attached through `.user(u -> u.text(...).media(...))` with `image/png` and `application/pdf` MIME types. The model receives the media directly; the recipe performs no embedding or vector-store ingestion. Both answers are logged.
+
+These twenty recipes depend on `org.springaicommunity:spring-ai-inspector-starter:0.0.1-SNAPSHOT`. Before running them, build and install the Inspector artifacts into your local Maven repository following the [Spring AI Inspector README](https://github.com/tzolov/voxxeddays2026-demo/blob/main/spring-ai-inspector/README.md). The root build resolves the starter and its parent POM through `mavenLocal()`. All twenty recipes enable Inspector with `spring.ai.inspector.enabled: true`.
 
 Run a recipe from the repository root with its provider key:
 
@@ -208,6 +211,7 @@ GEMINI_API_KEY=your-api-key ./gradlew :15-ask-user-question:bootRun
 GEMINI_API_KEY=your-api-key ./gradlew :16-subagents:bootRun
 GEMINI_API_KEY=your-api-key ./gradlew :20-memory-session:bootRun
 GEMINI_API_KEY=your-api-key ./gradlew :22-bank-support-agent:bootRun
+GEMINI_API_KEY=your-api-key ./gradlew :23-multimodality:23-multimodality-1-vision-chat:bootRun
 ```
 
 The `mcp-stdio-server` recipe enables the MCP stdio transport with `spring.ai.mcp.server.stdio: true` and exposes `get-weather-for-zipcode` using `@McpTool`. The tool returns sample weather data and requires no API key or external weather service.
