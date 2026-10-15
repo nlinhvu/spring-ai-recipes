@@ -27,6 +27,7 @@ public final class Timeline {
 			throw new IllegalArgumentException("Different producer instance");
 		}
 
+		long arrival = ++received;
 		Row previous = rows.get(event.sourceSeq());
 		if (previous != null) {
 			if (!previous.event().equals(event)) {
@@ -37,7 +38,6 @@ public final class Timeline {
 
 		if (rows.size() == capacity) throw new IllegalStateException("Timeline capacity reached");
 
-		long arrival = ++received;
 		boolean late = !rows.isEmpty() && event.sourceSeq() < rows.lastKey();
 		rows.put(event.sourceSeq(), new Row(event, arrival, late));
 

@@ -28,7 +28,11 @@ subprojects {
         return
     }
     apply plugin: 'java'
-    apply plugin: 'org.springframework.boot'
+    if (name in ['inspector-core', 'inspector-client']) {
+        apply plugin: 'java-library'
+    } else {
+        apply plugin: 'org.springframework.boot'
+    }
     apply plugin: 'io.spring.dependency-management'
 
     group = 'dev.linhvu.example'
@@ -52,6 +56,9 @@ subprojects {
 
     dependencyManagement {
         imports {
+            if (project.name in ['inspector-core', 'inspector-client']) {
+                mavenBom 'org.springframework.boot:spring-boot-dependencies:4.1.1'
+            }
             mavenBom "org.springframework.ai:spring-ai-bom:${rootProject.ext.springAiVersion}"
         }
 

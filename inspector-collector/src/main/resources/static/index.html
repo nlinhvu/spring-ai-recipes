@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Recipe Inspector</title>
+    <style>
+        body { margin:24px; font:16px/1.5 system-ui; background:#f5f7f5; color:#182c29; }
+        .scroll { overflow:auto; } table { border-collapse:collapse; width:100%; background:white; }
+        th,td { text-align:left; padding:12px; border-bottom:1px solid #bbc7c1; vertical-align:top; }
+        td { min-width:100px; } code { overflow-wrap:anywhere; } summary { cursor:pointer; }
+        :focus-visible { outline:3px solid #086b51; outline-offset:3px; }
+    </style>
+</head>
+<body><main>
+    <h1>Recipe Inspector</h1>
+    <p>Capture order per producer. Synchronous ChatClient calls only.</p>
+    <label for="run">Producer</label> <select id="run"></select>
+    <p id="status" role="status">Connecting...</p>
+    <p>Events may be missing after exporter failures. Check the application's inspector counters.
+        START without a terminal event is incomplete, not success.</p>
+    <section class="scroll" tabindex="0" aria-label="Event timeline">
+        <table><thead><tr><th scope="col">Capture</th><th scope="col">Time (UTC)</th>
+            <th scope="col">Ingest</th><th scope="col">Operation</th><th scope="col">Kind</th>
+            <th scope="col">Diagnostics</th><th scope="col">Detail</th></tr></thead><tbody id="rows"></tbody></table>
+    </section>
+</main>
+<script>
+    const select = document.querySelector('#run');
+    const body = document.querySelector('#rows');
+    const status = document.querySelector('#status');
+    let last = '';
+    async function getJson(path) {
+        const response = await fetch(path, {cache: 'no-store'});
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.json();
+    }
+    function draw(rows) {
+        body.replaceChildren();
+        let expected = 1, previousTime = null;
+        for (const row of rows) {
+            const event = row.event;
+            const flags = [];
+            if (row.arrivedLate) flags.push('late arrival');
+            if (event.sourceSeq !== expected) flags.push('sequence gap');
+            const time = Date.parse(event.occurredAt);
+            if (previousTime !== null && time < previousTime) flags.push('timestamp decreased');
+            previousTime = time; expected = event.sourceSeq + 1;
+            const tr = document.createElement('tr');
+            for (const value of [event.sourceSeq, event.occurredAt, row.ingestSeq,
+                event.operationId, event.kind, flags.join('; ')]) {
+                const td = document.createElement('td'); td.textContent = String(value); tr.append(td);
+            }
+            const td = document.createElement('td'), detail = document.createElement('details');
+            const summary = document.createElement('summary'), content = document.createElement('code');
+            summary.textContent = 'Show detail'; content.textContent = event.summary;
+            detail.append(summary, content); td.append(detail); tr.append(td); body.append(tr);
+        }
+    }
+    async function refresh() {
+        try {
+            const runs = await getJson('/api/runs');
+            const selected = select.value;
+            const known = [...select.options].map(option => option.value);
+            if (JSON.stringify(known) !== JSON.stringify(runs)) {
+                select.replaceChildren(...runs.map(id => new Option(id, id)));
+                if (runs.includes(selected)) select.value = selected;
+            }
+            const rows = select.value ? await getJson('/api/events?producerId=' + encodeURIComponent(select.value)) : [];
+            const signature = JSON.stringify([select.value, rows]);
+            if (signature !== last) { draw(rows); last = signature; }
+            status.textContent = `${rows.length} captured events; refreshed ${new Date().toLocaleTimeString()}`;
+        } catch (error) {
+            status.textContent = 'Collector unavailable; displayed rows may be stale';
+        } finally {
+            setTimeout(refresh, 1000);
+        }
+    }
+    refresh();
+</script>
+</body></html>
