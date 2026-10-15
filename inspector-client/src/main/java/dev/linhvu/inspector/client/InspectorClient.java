@@ -10,6 +10,7 @@ import java.time.Instant;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
@@ -72,19 +73,39 @@ public final class InspectorClient implements AutoCloseable{
 		};
 	}
 
-	public synchronized void emit(String operationId, Event.Kind kind, String summary) {
+	public void emit(String operationId, Event.Kind kind, String summary) {
+		emit(operationId, null, kind, summary);
+	}
+
+	public synchronized void emit(String operationId, String parentOperationId,
+			Event.Kind kind, String summary) {
 		long seq = ++sequence;
 		if (System.currentTimeMillis() < pausedUntil) {
 			skipped.incrementAndGet();
 			return;
 		}
+		String body = build(seq, operationId, parentOperationId, kind, summary);
+		if (body != null) background(body);
+	}
 
-		Event event = new Event(producerId, seq, Instant.now(), operationId, null, kind, summary);
-		String body = json.toJson(event);
+	private String build(long seq, String operationId, String parentOperationId,
+			Event.Kind kind, String summary) {
+		try {
+			return json.toJson(new Event(producerId, seq, Instant.now(),
+					operationId, parentOperationId, kind, summary));
+		}
+		catch (RuntimeException | LinkageError ex) {
+			skipped.incrementAndGet();
+			System.err.println("Inspector capture skipped: " + ex.getClass().getSimpleName());
+			return null;
+		}
+	}
+
+	private void background(String body) {
+		pending.incrementAndGet();
 		try {
 			executorService.execute(() -> {
 				try {
-					pending.incrementAndGet();
 					deliver(body);
 				}
 				finally {
@@ -92,9 +113,9 @@ public final class InspectorClient implements AutoCloseable{
 				}
 			});
 		}
-		catch (Exception e) {
+		catch (RejectedExecutionException _) {
+			pending.decrementAndGet();
 			skipped.incrementAndGet();
-			System.err.println("Inspector capture skipped: " + e.getClass().getSimpleName());
 		}
 	}
 
@@ -120,7 +141,7 @@ public final class InspectorClient implements AutoCloseable{
 	}
 
 	@Override
-	public void close() throws Exception {
+	public void close() {
 		executorService.shutdown();
 		try {
 			if (!executorService.awaitTermination(10, TimeUnit.SECONDS)) {

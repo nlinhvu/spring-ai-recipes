@@ -9,3 +9,10 @@ tasks.register('inspectorSmoke', JavaExec) {
     mainClass = 'dev.linhvu.inspector.client.SmokeDemo'
     args providers.gradleProperty('scenario').getOrElse('normal')
 }
+
+tasks.register('inspectorStreamSmoke', JavaExec) {
+    dependsOn classes
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'dev.linhvu.inspector.client.StreamSmokeDemo'
+    args providers.gradleProperty('scenario').getOrElse('normal')
+}
