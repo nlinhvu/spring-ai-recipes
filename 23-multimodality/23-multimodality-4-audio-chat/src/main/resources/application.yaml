@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: application
+
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      chat:
+        model: gpt-audio-1.5
+      audio:
+        speech:
+          model: tts-1
+
+    inspector:
+      enabled: true
