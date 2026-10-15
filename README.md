@@ -13,7 +13,7 @@ Gradle recipes are subprojects of a shared root build; `mcp-server-oauth` contai
 - JBang, for `jbang-tool-use` and `jbang-mcp`
 - Node.js and npm (`npx`), for the exchange-rate MCP server used by `22-bank-support-agent`
 
-The examples currently use Spring Boot 4.1.1 and Spring AI 2.0.1. Dependencies are downloaded from Maven Central through Gradle or JBang, except for the locally installed Spring AI Inspector snapshot used by `01-chat-memory`, `02-rag`, `03-modular-rag`, `04-guardrails-input`, `05-guardrails-structured-output`, `06-guardrails-builtin-structured-output`, `07-guardrails-jev`, `08-tool-search-tool`, `09-tool-search-tool-jev`, `10-as-a-judge-llm`, `11-as-a-judge-jev`, `12-tool-argument-augmenter`, `13-skills`, `14-todo-write`, `15-ask-user-question`, `16-subagents`, `19-auto-memory`, `20-memory-session`, `22-bank-support-agent`, `23-multimodality-1-vision-chat`, and `23-multimodality-2-image-generation` (see Configuration).
+The examples currently use Spring Boot 4.1.1 and Spring AI 2.0.1. Dependencies are downloaded from Maven Central through Gradle or JBang, except for the locally installed Spring AI Inspector snapshot used by `01-chat-memory`, `02-rag`, `03-modular-rag`, `04-guardrails-input`, `05-guardrails-structured-output`, `06-guardrails-builtin-structured-output`, `07-guardrails-jev`, `08-tool-search-tool`, `09-tool-search-tool-jev`, `10-as-a-judge-llm`, `11-as-a-judge-jev`, `12-tool-argument-augmenter`, `13-skills`, `14-todo-write`, `15-ask-user-question`, `16-subagents`, `19-auto-memory`, `20-memory-session`, `22-bank-support-agent`, `23-multimodality-1-vision-chat`, `23-multimodality-2-image-generation`, and `23-multimodality-3-speech-and-transcription` (see Configuration).
 
 ## Quick start
 
@@ -120,6 +120,7 @@ The client launches the JBang MCP server as a subprocess and communicates over s
 | 60 | [`22-bank-support-agent`](22-bank-support-agent)           | Combine typed tool dependencies, session memory, refund skills, MCP exchange rates, and structured support output | Google Gemini via OpenAI-compatible API, H2, Spring AI sessions, MCP stdio server, Spring AI Inspector |
 | 61 | [`23-multimodality-1-vision-chat`](23-multimodality/23-multimodality-1-vision-chat) | Send a chart image and a PDF directly as media in chat prompts | Google Gemini via OpenAI-compatible API, Spring AI Inspector |
 | 62 | [`23-multimodality-2-image-generation`](23-multimodality/23-multimodality-2-image-generation) | Generate images through ImageModel directly and through a chat tool, then save returned image bytes | OpenAI chat and image generation, Spring AI Inspector |
+| 63 | [`23-multimodality-3-speech-and-transcription`](23-multimodality/23-multimodality-3-speech-and-transcription) | Synthesize speech and transcribe it through direct model calls and chat tools | OpenAI chat, text-to-speech and transcription, Spring AI Inspector |
 
 ## Configuration
 
@@ -127,7 +128,7 @@ Model provider API keys are read from environment variables and are intentionall
 
 | Variable | Used by |
 | --- | --- |
-| `OPENAI_API_KEY` | `02-rag`, `03-modular-rag`, `08-tool-search-tool`, `09-tool-search-tool-jev`, `23-multimodality-2-image-generation`, `voicechat-stt`, `voicechat-tts`, and the OpenAI portion of `voicechat-tts-elevenlabs` |
+| `OPENAI_API_KEY` | `02-rag`, `03-modular-rag`, `08-tool-search-tool`, `09-tool-search-tool-jev`, `23-multimodality-2-image-generation`, `23-multimodality-3-speech-and-transcription`, `voicechat-stt`, `voicechat-tts`, and the OpenAI portion of `voicechat-tts-elevenlabs` |
 | `GEMINI_API_KEY` | Gemini-based examples, including `01-chat-memory`, `04-guardrails-input`, `05-guardrails-structured-output`, `06-guardrails-builtin-structured-output`, `07-guardrails-jev`, `10-as-a-judge-llm`, `11-as-a-judge-jev`, `12-tool-argument-augmenter`, `13-skills`, `14-todo-write`, `15-ask-user-question`, `16-subagents`, `19-auto-memory`, `20-memory-session`, `22-bank-support-agent`, `23-multimodality-1-vision-chat`, and other recipes using the OpenAI-compatible Gemini endpoint |
 | `TYPESAFE_API_KEY` | `typesafe-simple` (defaults to `nothing`), `03-modular-rag`, `07-guardrails-jev`, `09-tool-search-tool-jev`, and `11-as-a-judge-jev` (the latter four default to `ollama`), all configured for a local endpoint |
 | `ELEVENLABS_API_KEY` | `voicechat-tts-elevenlabs` |
@@ -191,7 +192,9 @@ The `23-multimodality-1-vision-chat` recipe is a nested Gradle project under `23
 
 The `23-multimodality-2-image-generation` recipe is a nested Gradle project under `23-multimodality/`. It calls OpenAI `gpt-image-1-mini` through `ImageModel` to generate two 1024 × 1024 lighthouse images: an oil painting at dusk and a low-quality watercolor at noon. It then uses `gpt-5-mini-2025-08-07` with an `ImageTools.generateImage` tool to request a sailing-boat image. Base64 image responses are decoded into `target/image-dusk.png`, `target/image-noon.png`, and `target/image-tool.png` relative to the application working directory; URL responses are printed instead. The tool returns image-generation metadata to the chat model, and the final chat answer is logged. Inspector can display the direct image calls and the image call nested within the tool invocation.
 
-These twenty-one recipes depend on `org.springaicommunity:spring-ai-inspector-starter:0.0.1-SNAPSHOT`. Before running them, build and install the Inspector artifacts into your local Maven repository following the [Spring AI Inspector README](https://github.com/tzolov/voxxeddays2026-demo/blob/main/spring-ai-inspector/README.md). The root build resolves the starter and its parent POM through `mavenLocal()`. All twenty-one recipes enable Inspector with `spring.ai.inspector.enabled: true`.
+The `23-multimodality-3-speech-and-transcription` recipe is a nested Gradle project under `23-multimodality/`. It uses OpenAI `tts-1` through `TextToSpeechModel` to synthesize a welcome sentence with the `alloy` voice, saves the MP3 to `target/speech.mp3` relative to the application working directory, then uploads that file to `whisper-1` through `TranscriptionModel` and logs the transcript. A second round trip is driven by `gpt-5-mini-2025-08-07` using `speak` and `transcribeLast` tools: speech uses the `nova` voice, and the audio bytes are held in memory for transcription. The final chat answer compares the requested sentence with its transcript. Inspector can display playable audio for the direct calls and the calls nested within tool invocations. No microphone input is required.
+
+These twenty-two recipes depend on `org.springaicommunity:spring-ai-inspector-starter:0.0.1-SNAPSHOT`. Before running them, build and install the Inspector artifacts into your local Maven repository following the [Spring AI Inspector README](https://github.com/tzolov/voxxeddays2026-demo/blob/main/spring-ai-inspector/README.md). The root build resolves the starter and its parent POM through `mavenLocal()`. All twenty-two recipes enable Inspector with `spring.ai.inspector.enabled: true`.
 
 Run a recipe from the repository root with its provider key:
 
@@ -216,6 +219,7 @@ GEMINI_API_KEY=your-api-key ./gradlew :20-memory-session:bootRun
 GEMINI_API_KEY=your-api-key ./gradlew :22-bank-support-agent:bootRun
 GEMINI_API_KEY=your-api-key ./gradlew :23-multimodality:23-multimodality-1-vision-chat:bootRun
 OPENAI_API_KEY=your-api-key ./gradlew :23-multimodality:23-multimodality-2-image-generation:bootRun
+OPENAI_API_KEY=your-api-key ./gradlew :23-multimodality:23-multimodality-3-speech-and-transcription:bootRun
 ```
 
 The `mcp-stdio-server` recipe enables the MCP stdio transport with `spring.ai.mcp.server.stdio: true` and exposes `get-weather-for-zipcode` using `@McpTool`. The tool returns sample weather data and requires no API key or external weather service.
