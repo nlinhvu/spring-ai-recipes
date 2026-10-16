@@ -1,48 +1,53 @@
 package dev.linhvu.inspector.collector;
 
-import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
-
-import dev.linhvu.inspector.Event;
-import dev.linhvu.inspector.Timeline;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @RestController
+@RequestMapping("/api")
 public class EventController {
 
-	private final Map<String, Timeline> runs = new TreeMap<>(); // producerId, TimeLine
+	private final EventStore store;
+	private final BlobStore blobs;
+	private final LegacyEventController legacy;
 
-	@PostMapping("/api/events")
-	public synchronized Map<String, String> accept(@RequestBody Event event) {
-		Timeline timeline = runs.computeIfAbsent(event.producerId(), id -> new Timeline(id, 10000));
-		return Map.of("result", timeline.accept(event).name());
+	public EventController(EventStore store, BlobStore blobs, LegacyEventController legacy) {
+		this.store = store;
+		this.blobs = blobs;
+		this.legacy = legacy;
 	}
 
-	@GetMapping("/api/runs")
-	public synchronized List<String> runs() { return List.copyOf(runs.keySet()); }
+	@PostMapping("/events")
+	public void event(@RequestBody Map<String, Object> event) {
+		this.store.add(event);
+	}
 
-	@GetMapping("/api/events")
-	public synchronized List<Timeline.Row> events(@RequestParam("producerId") String producerId) {
-		Timeline timeline = runs.get(producerId);
-		return timeline == null ? List.of() : timeline.snapshot();
+	@GetMapping("/stream")
+	public SseEmitter stream() {
+		return this.store.subscribe();
 	}
 
 	@ExceptionHandler(IllegalArgumentException.class)
-	public ResponseEntity<Map<String, String>> invalid(IllegalArgumentException ex) {
-		return ResponseEntity.badRequest().body(Map.of("error", "Invalid or conflicting event"));
+	public ResponseEntity<Map<String, Object>> rejected(IllegalArgumentException ex) {
+		return ResponseEntity.badRequest().body(Map.of("error", String.valueOf(ex.getMessage())));
 	}
 
-	@ExceptionHandler(IllegalStateException.class)
-	public ResponseEntity<Map<String, String>> full(IllegalStateException ex) {
-		return ResponseEntity.status(503).body(Map.of("error", "Timeline capacity reached"));
+	@DeleteMapping("/events")
+	public void clear() {
+		synchronized (legacy) {
+			this.store.clear();
+			this.blobs.clear();
+			this.legacy.clearLegacy();
+		}
 	}
 
 }

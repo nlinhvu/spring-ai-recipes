@@ -50,7 +50,7 @@ public final class InspectorClient implements AutoCloseable{
 		if (!"http".equals(collectorUri.getScheme()) || !"127.0.0.1".equals(collectorUri.getHost())) {
 			throw new IllegalArgumentException("Use an http://127.0.0.1 collector URL");
 		}
-		URI eventsUri = collectorUri.resolve("/api/events");
+		URI eventsUri = collectorUri.resolve("/api/legacy-events");
 		HttpClient httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofMillis(500)).build();
 		return body -> {
 			try {

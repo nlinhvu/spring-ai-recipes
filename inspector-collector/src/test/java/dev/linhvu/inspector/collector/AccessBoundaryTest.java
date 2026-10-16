@@ -107,12 +107,15 @@ class AccessBoundaryTest {
 
 	@Test
 	void protectsExistingMvcEndpoints() throws Exception {
-		var mvc = MockMvcBuilders.standaloneSetup(new EventController())
-				.addFilters(new AccessFilter(properties("local-demo-token", null), "127.0.0.1"))
-				.build();
-		mvc.perform(get("/api/runs")).andExpect(status().isUnauthorized());
-		mvc.perform(get("/api/runs").header("X-Inspector-Token", "local-demo-token"))
-				.andExpect(status().isOk()).andExpect(content().json("[]"));
-		mvc.perform(get("/api/ping")).andExpect(status().isNotFound());
+		EventStore store = new EventStore();
+		try {
+			var mvc = MockMvcBuilders.standaloneSetup(new LegacyEventController(store))
+					.addFilters(new AccessFilter(properties("local-demo-token", null), "127.0.0.1"))
+					.build();
+			mvc.perform(get("/api/runs")).andExpect(status().isUnauthorized());
+			mvc.perform(get("/api/runs").header("X-Inspector-Token", "local-demo-token"))
+					.andExpect(status().isOk()).andExpect(content().json("[]"));
+			mvc.perform(get("/api/ping")).andExpect(status().isNotFound());
+		} finally { store.shutdown(); }
 	}
 }
