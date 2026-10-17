@@ -1,6 +1,12 @@
 dependencies {
     api project(':inspector-core')
     implementation 'org.springframework.ai:spring-ai-client-chat'
+    implementation 'org.springframework.boot:spring-boot-autoconfigure'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.ai:spring-ai-autoconfigure-model-chat-client'
+    testImplementation 'org.springframework.ai:spring-ai-autoconfigure-model-tool'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 tasks.register('inspectorSmoke', JavaExec) {
@@ -15,4 +21,12 @@ tasks.register('inspectorStreamSmoke', JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     mainClass = 'dev.linhvu.inspector.client.StreamSmokeDemo'
     args providers.gradleProperty('scenario').getOrElse('normal')
+}
+
+tasks.register('inspectorBootDemo', JavaExec) {
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'dev.linhvu.inspector.client.demo.BootWiringDemo'
+    args "--spring.ai.inspector.active=${providers.gradleProperty('active').getOrElse('true')}"
+    args '--spring.ai.inspector.url=http://127.0.0.1:9002'
 }
