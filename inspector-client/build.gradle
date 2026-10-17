@@ -29,4 +29,7 @@ tasks.register('inspectorBootDemo', JavaExec) {
     mainClass = 'dev.linhvu.inspector.client.demo.BootWiringDemo'
     args "--spring.ai.inspector.active=${providers.gradleProperty('active').getOrElse('true')}"
     args '--spring.ai.inspector.url=http://127.0.0.1:9002'
+    args "--recovery=${providers.gradleProperty('recovery').getOrElse('false')}"
+    args "--spring.ai.inspector.token=${providers.gradleProperty('inspectorToken').getOrElse('')}"
+    args "--spring.ai.inspector.run-id=${providers.gradleProperty('runId').getOrElse('')}"
 }
