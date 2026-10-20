@@ -6,7 +6,7 @@ dependencies {
     implementation 'org.springaicommunity:spring-ai-agent-utils'
     implementation 'com.skillsjars:anthropics__skills__pdf'
 
-    implementation 'org.springaicommunity:spring-ai-inspector-starter'
+    implementation project(':inspector-client')
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'

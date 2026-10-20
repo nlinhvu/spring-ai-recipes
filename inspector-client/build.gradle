@@ -1,0 +1,19 @@
+dependencies {
+    api 'org.springframework.ai:spring-ai-client-chat'
+    implementation 'org.springframework.boot:spring-boot-autoconfigure'
+
+    compileOnly 'org.springframework.ai:spring-ai-vector-store'
+    compileOnly 'org.springframework.ai:spring-ai-mcp'
+    compileOnly 'org.springframework.ai:spring-ai-autoconfigure-mcp-client-common'
+
+    compileOnly 'org.springframework.ai:spring-ai-anthropic'
+    compileOnly 'org.springframework.ai:spring-ai-openai'
+
+    compileOnly 'org.springframework.boot:spring-boot-restclient'
+    compileOnly 'org.springframework.boot:spring-boot-webclient'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.ai:spring-ai-autoconfigure-model-chat-client'
+    testImplementation 'org.springframework.ai:spring-ai-autoconfigure-model-tool'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
