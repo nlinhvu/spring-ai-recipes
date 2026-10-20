@@ -13,7 +13,7 @@ Gradle recipes are subprojects of a shared root build; `mcp-server-oauth` contai
 - JBang, for `jbang-tool-use` and `jbang-mcp`
 - Node.js and npm (`npx`), for the exchange-rate MCP server used by `22-bank-support-agent`
 
-The examples currently use Spring Boot 4.1.1 and Spring AI 2.0.1. Dependencies are downloaded from Maven Central through Gradle or JBang. Recipes with Inspector integration use the local [`inspector-client`](inspector-client) Gradle library module; they do not require installing an external Inspector starter into your local Maven repository. A running Spring AI Inspector server is needed to collect and view events (see [Inspector client](#inspector-client)).
+The examples currently use Spring Boot 4.1.1 and Spring AI 2.0.1. Dependencies are downloaded from Maven Central through Gradle or JBang. Recipes with Inspector integration use the local [`inspector-client`](inspector-client) Gradle library module; they do not require installing an external Inspector starter into your local Maven repository. The local [`inspector-collector`](inspector-collector) application collects and displays those events (see [Inspector collector](#inspector-collector)).
 
 ## Quick start
 
@@ -136,7 +136,7 @@ dependencies {
 }
 ```
 
-Start the Spring AI Inspector server before launching a recipe. During application startup, the client checks `http://localhost:9001/api/ping`; when Inspector is available, it activates instrumentation and routes eligible provider requests through the recording proxy. If Inspector is unavailable at startup, the client leaves the recipe's configuration unchanged. See the [Spring AI Inspector README](https://github.com/tzolov/voxxeddays2026-demo/blob/main/spring-ai-inspector/README.md) for server setup.
+Start [inspector-collector](#inspector-collector) before launching a recipe. During application startup, the client checks `http://localhost:9001/api/ping`; when Inspector is available, it activates instrumentation and routes eligible provider requests through the recording proxy. If Inspector is unavailable at startup, the client leaves the recipe's configuration unchanged.
 
 Configuration options include:
 
@@ -146,6 +146,26 @@ Configuration options include:
 - `spring.ai.inspector.memory-snapshots`: set to `false` to skip before/after memory snapshots.
 
 Provider-specific, vector-store, and MCP integrations are compile-only dependencies of the library; the recipe supplies the dependencies for the features it uses.
+
+## Inspector collector
+
+[`inspector-collector`](inspector-collector) is the repository's local Inspector server, based on the Spring AI Inspector server. It receives events from `inspector-client`, keeps events and media in memory, streams updates to the browser over SSE, and records eligible provider HTTP traffic through its forwarding proxy. The bundled UI provides cards and sequence views, media previews, and recording import, export, and replay.
+
+Start the collector from the repository root:
+
+```bash
+./gradlew :inspector-collector:bootRun
+```
+
+Open [http://localhost:9001](http://localhost:9001), then launch an instrumented recipe in a separate terminal, for example:
+
+```bash
+GEMINI_API_KEY=your-api-key ./gradlew :01-chat-memory:bootRun
+```
+
+The collector itself requires no model API key; the recipe supplies the credentials for its provider. The server listens on `127.0.0.1:9001` by default. Its UI is served directly from `src/main/resources/static` using plain JavaScript modules, with no npm build step.
+
+Server configuration is in `inspector-collector/src/main/resources/application.properties`. Set `server.port` to change the port and configure the recipes' `spring.ai.inspector.url` to match. If `spring.ai.inspector.token` is set on the collector, set the same token in the instrumented recipes. Event and media retention is bounded by `spring.ai.inspector.max-total-bytes` and `spring.ai.inspector.max-blob-bytes`; recordings are held in memory, so export any runs you want to keep before restarting the collector.
 
 ## Configuration
 
@@ -223,7 +243,7 @@ The `23-multimodality-4-audio-chat` recipe is a nested Gradle project under `23-
 
 The `23-multimodality-5-gemini-image-chat` recipe is a nested Gradle project under `23-multimodality/`. It uses the Google GenAI starter with `gemini-3.1-flash-lite-image` and `GEMINI_API_KEY` configured under `spring.ai.google.genai`. The first chat request draws a conference stage; the second sends the returned image back through `.media(picture)` and asks for a nighttime version. Images are read from `AssistantMessage.getMedia()` and saved as `target/stage.<extension>` and `target/stage-night.<extension>` relative to the application working directory, using the returned MIME type to choose the extension (`jpg` for JPEG). Any accompanying text is printed. Inspector captures these calls through chat-client advisors rather than the recording proxy, so image previews are available without a wire view of the Google GenAI SDK requests.
 
-These twenty-four recipes depend on the local `inspector-client` module described above and enable Inspector with `spring.ai.inspector.enabled: true`. Run the Inspector server before starting a recipe to collect its events; Gradle builds the client module automatically as a project dependency.
+These twenty-four recipes depend on the local `inspector-client` module described above and enable Inspector with `spring.ai.inspector.enabled: true`. Run `inspector-collector` before starting a recipe to collect its events; Gradle builds the client module automatically as a project dependency.
 
 Run a recipe from the repository root with its provider key:
 
