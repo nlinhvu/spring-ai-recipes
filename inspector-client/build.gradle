@@ -1,3 +1,7 @@
+configurations {
+    testImplementation.extendsFrom compileOnly
+}
+
 dependencies {
     api 'org.springframework.ai:spring-ai-client-chat'
     implementation 'org.springframework.boot:spring-boot-autoconfigure'
@@ -15,5 +19,6 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.ai:spring-ai-autoconfigure-model-chat-client'
     testImplementation 'org.springframework.ai:spring-ai-autoconfigure-model-tool'
+    testImplementation 'org.springframework.boot:spring-boot-micrometer-observation'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
