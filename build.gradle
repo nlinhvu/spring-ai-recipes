@@ -28,7 +28,7 @@ subprojects {
         return
     }
     apply plugin: 'java'
-    if (name in ['inspector-core', 'inspector-client']) {
+    if (name in ['inspector-client']) {
         apply plugin: 'java-library'
     } else {
         apply plugin: 'org.springframework.boot'
@@ -45,18 +45,12 @@ subprojects {
     }
 
     repositories {
-        mavenLocal {
-            content {
-                includeModule 'org.springaicommunity', 'spring-ai-inspector-starter'
-                includeModule 'org.springaicommunity', 'spring-ai-inspector-parent'
-            }
-        }
         mavenCentral()
     }
 
     dependencyManagement {
         imports {
-            if (project.name in ['inspector-core', 'inspector-client']) {
+            if (project.name in ['inspector-client']) {
                 mavenBom 'org.springframework.boot:spring-boot-dependencies:4.1.1'
             }
             mavenBom "org.springframework.ai:spring-ai-bom:${rootProject.ext.springAiVersion}"
@@ -81,7 +75,6 @@ subprojects {
             dependency "com.skillsjars:anthropics__skills__pdf:${rootProject.ext.pdfSkillsVersion}"
             dependency "com.skillsjars:browser-use__browser-use__remote-browser:${rootProject.ext.browserSkillsVersion}"
             dependency "javazoom:jlayer:${rootProject.ext.jlayerVersion}"
-            dependency 'org.springaicommunity:spring-ai-inspector-starter:0.0.1-SNAPSHOT'
         }
     }
 

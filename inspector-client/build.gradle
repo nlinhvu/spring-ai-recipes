@@ -1,35 +1,19 @@
 dependencies {
-    api project(':inspector-core')
-    implementation 'org.springframework.ai:spring-ai-client-chat'
+    api 'org.springframework.ai:spring-ai-client-chat'
     implementation 'org.springframework.boot:spring-boot-autoconfigure'
+
+    compileOnly 'org.springframework.ai:spring-ai-vector-store'
+    compileOnly 'org.springframework.ai:spring-ai-mcp'
+    compileOnly 'org.springframework.ai:spring-ai-autoconfigure-mcp-client-common'
+
+    compileOnly 'org.springframework.ai:spring-ai-anthropic'
+    compileOnly 'org.springframework.ai:spring-ai-openai'
+
+    compileOnly 'org.springframework.boot:spring-boot-restclient'
+    compileOnly 'org.springframework.boot:spring-boot-webclient'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.ai:spring-ai-autoconfigure-model-chat-client'
     testImplementation 'org.springframework.ai:spring-ai-autoconfigure-model-tool'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-}
-
-tasks.register('inspectorSmoke', JavaExec) {
-    dependsOn classes
-    classpath = sourceSets.main.runtimeClasspath
-    mainClass = 'dev.linhvu.inspector.client.SmokeDemo'
-    args providers.gradleProperty('scenario').getOrElse('normal')
-}
-
-tasks.register('inspectorStreamSmoke', JavaExec) {
-    dependsOn classes
-    classpath = sourceSets.main.runtimeClasspath
-    mainClass = 'dev.linhvu.inspector.client.StreamSmokeDemo'
-    args providers.gradleProperty('scenario').getOrElse('normal')
-}
-
-tasks.register('inspectorBootDemo', JavaExec) {
-    dependsOn testClasses
-    classpath = sourceSets.test.runtimeClasspath
-    mainClass = 'dev.linhvu.inspector.client.demo.BootWiringDemo'
-    args "--spring.ai.inspector.active=${providers.gradleProperty('active').getOrElse('true')}"
-    args '--spring.ai.inspector.url=http://127.0.0.1:9002'
-    args "--recovery=${providers.gradleProperty('recovery').getOrElse('false')}"
-    args "--spring.ai.inspector.token=${providers.gradleProperty('inspectorToken').getOrElse('')}"
-    args "--spring.ai.inspector.run-id=${providers.gradleProperty('runId').getOrElse('')}"
 }

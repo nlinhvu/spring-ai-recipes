@@ -3,7 +3,7 @@ description = '23-multimodality-3-speech-and-transcription'
 dependencies {
     implementation 'org.springframework.ai:spring-ai-starter-model-openai'
 
-    implementation 'org.springaicommunity:spring-ai-inspector-starter'
+    implementation project(':inspector-client')
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'

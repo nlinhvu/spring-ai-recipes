@@ -13,7 +13,7 @@ Gradle recipes are subprojects of a shared root build; `mcp-server-oauth` contai
 - JBang, for `jbang-tool-use` and `jbang-mcp`
 - Node.js and npm (`npx`), for the exchange-rate MCP server used by `22-bank-support-agent`
 
-The examples currently use Spring Boot 4.1.1 and Spring AI 2.0.1. Dependencies are downloaded from Maven Central through Gradle or JBang, except for the locally installed Spring AI Inspector snapshot used by `01-chat-memory`, `02-rag`, `03-modular-rag`, `04-guardrails-input`, `05-guardrails-structured-output`, `06-guardrails-builtin-structured-output`, `07-guardrails-jev`, `08-tool-search-tool`, `09-tool-search-tool-jev`, `10-as-a-judge-llm`, `11-as-a-judge-jev`, `12-tool-argument-augmenter`, `13-skills`, `14-todo-write`, `15-ask-user-question`, `16-subagents`, `19-auto-memory`, `20-memory-session`, `22-bank-support-agent`, `23-multimodality-1-vision-chat`, `23-multimodality-2-image-generation`, `23-multimodality-3-speech-and-transcription`, `23-multimodality-4-audio-chat`, and `23-multimodality-5-gemini-image-chat` (see Configuration).
+The examples currently use Spring Boot 4.1.1 and Spring AI 2.0.1. Dependencies are downloaded from Maven Central through Gradle or JBang. Recipes with Inspector integration use the local [`inspector-client`](inspector-client) Gradle library module; they do not require installing an external Inspector starter into your local Maven repository. A running Spring AI Inspector server is needed to collect and view events (see [Inspector client](#inspector-client)).
 
 ## Quick start
 
@@ -124,6 +124,29 @@ The client launches the JBang MCP server as a subprocess and communicates over s
 | 64 | [`23-multimodality-4-audio-chat`](23-multimodality/23-multimodality-4-audio-chat) | Send a spoken question to a chat model and receive text and audio in one response | OpenAI audio chat and text-to-speech, Spring AI Inspector |
 | 65 | [`23-multimodality-5-gemini-image-chat`](23-multimodality/23-multimodality-5-gemini-image-chat) | Generate an image through chat, then send it back as media for an edit | Google Gemini via Google GenAI, Spring AI Inspector |
 
+## Inspector client
+
+[`inspector-client`](inspector-client) is the repository's local Spring Boot instrumentation library, based on the Spring AI Inspector starter. It reports chat-client and model calls, tool executions, memory snapshots, vector-store operations, embeddings, media, and MCP messages to a running Inspector server. It is a library module, not a standalone application.
+
+Recipes enable it through a project dependency:
+
+```groovy
+dependencies {
+    implementation project(':inspector-client')
+}
+```
+
+Start the Spring AI Inspector server before launching a recipe. During application startup, the client checks `http://localhost:9001/api/ping`; when Inspector is available, it activates instrumentation and routes eligible provider requests through the recording proxy. If Inspector is unavailable at startup, the client leaves the recipe's configuration unchanged. See the [Spring AI Inspector README](https://github.com/tzolov/voxxeddays2026-demo/blob/main/spring-ai-inspector/README.md) for server setup.
+
+Configuration options include:
+
+- `spring.ai.inspector.url`: Inspector server URL, defaulting to `http://localhost:9001`.
+- `spring.ai.inspector.enabled`: set to `false` to disable integration.
+- `spring.ai.inspector.token`: shared token when the server requires one.
+- `spring.ai.inspector.memory-snapshots`: set to `false` to skip before/after memory snapshots.
+
+Provider-specific, vector-store, and MCP integrations are compile-only dependencies of the library; the recipe supplies the dependencies for the features it uses.
+
 ## Configuration
 
 Model provider API keys are read from environment variables and are intentionally not stored in the repository:
@@ -200,7 +223,7 @@ The `23-multimodality-4-audio-chat` recipe is a nested Gradle project under `23-
 
 The `23-multimodality-5-gemini-image-chat` recipe is a nested Gradle project under `23-multimodality/`. It uses the Google GenAI starter with `gemini-3.1-flash-lite-image` and `GEMINI_API_KEY` configured under `spring.ai.google.genai`. The first chat request draws a conference stage; the second sends the returned image back through `.media(picture)` and asks for a nighttime version. Images are read from `AssistantMessage.getMedia()` and saved as `target/stage.<extension>` and `target/stage-night.<extension>` relative to the application working directory, using the returned MIME type to choose the extension (`jpg` for JPEG). Any accompanying text is printed. Inspector captures these calls through chat-client advisors rather than the recording proxy, so image previews are available without a wire view of the Google GenAI SDK requests.
 
-These twenty-four recipes depend on `org.springaicommunity:spring-ai-inspector-starter:0.0.1-SNAPSHOT`. Before running them, build and install the Inspector artifacts into your local Maven repository following the [Spring AI Inspector README](https://github.com/tzolov/voxxeddays2026-demo/blob/main/spring-ai-inspector/README.md). The root build resolves the starter and its parent POM through `mavenLocal()`. All twenty-four recipes enable Inspector with `spring.ai.inspector.enabled: true`.
+These twenty-four recipes depend on the local `inspector-client` module described above and enable Inspector with `spring.ai.inspector.enabled: true`. Run the Inspector server before starting a recipe to collect its events; Gradle builds the client module automatically as a project dependency.
 
 Run a recipe from the repository root with its provider key:
 
