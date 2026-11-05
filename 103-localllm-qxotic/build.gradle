@@ -1,0 +1,25 @@
+ext {
+	set('qxoticVersion', "0.3.1")
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "com.qxotic:jinfer-bom:${qxoticVersion}"
+	}
+}
+
+dependencies {
+	// Essential Spring AI dependencies needed
+	implementation 'org.springframework.boot:spring-boot-starter'
+	implementation 'org.springframework.ai:spring-ai-client-chat'
+
+	// Qxotic dependencies
+	implementation("com.qxotic:jinfer-spring-ai-spring-boot-starter")
+	implementation("com.qxotic:jinfer-models-all")
+
+	implementation("com.qxotic:jam-native")
+	implementation("com.qxotic:jam-vector")
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}

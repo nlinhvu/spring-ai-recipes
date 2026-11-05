@@ -7,7 +7,7 @@ Gradle recipes are subprojects of a shared root build; `mcp-server-oauth` contai
 ## Requirements
 
 - Java 25 (the projects use the Gradle Java toolchain)
-- An API key for the model provider used by the recipe
+- An API key for recipes that use a hosted model provider
 - Docker, for the Redis and Qdrant recipes
 - A local Ollama installation, for recipes that use Ollama
 - JBang, for `jbang-tool-use` and `jbang-mcp`
@@ -158,6 +158,7 @@ Open the URL printed by Vite and ask for the weather in zip code `10001` to try 
 | 66 | [`100-ag-ui`](100-ag-ui)                                     | Chat with a Spring AI agent and weather tool through an AG-UI React frontend | Google Gemini via OpenAI-compatible API, AG-UI, CopilotKit, Vite |
 | 67 | [`101-mcp-resource-apps`](101-mcp-resource-apps)               | Expose a weather tool linked to an HTML UI resource for MCP Apps | MCP Apps host, Spring AI MCP server, no model provider required |
 | 68 | [`102-ag-ui-mcp-apps`](102-ag-ui-mcp-apps)                     | Render MCP App widgets in an AG-UI chat and proxy their resource and tool requests | Google Gemini via OpenAI-compatible API, MCP HTTP server, AG-UI, CopilotKit, Vite |
+| 69 | [`103-localllm-qxotic`](103-localllm-qxotic)                   | Run interactive local chat with a registered weather tool using Qxotic Jinfer | Local LiquidAI LFM2.5-350M GGUF model, Qxotic Jinfer |
 
 ## Inspector client
 
@@ -218,6 +219,17 @@ The exact model and endpoint settings are in each project's `src/main/resources/
 The `101-mcp-resource-apps` recipe exposes `get-weather-for-zipcode` over stateless Streamable HTTP at `http://localhost:3000/mcp`. Its tool metadata points to `ui://weather/weather.html`, served through `resources/read` with MIME type `text/html;profile=mcp-app`. The tool returns sample weather data; the HTML is a separate resource that an MCP Apps host can fetch and render. This server requires no model API key and shares port `3000` with the other MCP HTTP server recipes.
 
 The `102-ag-ui-mcp-apps` recipe connects to that server and exposes its tools through a Spring AI agent using `GEMINI_API_KEY`. Its `McpAppsAgent` emits an `mcp-apps` activity after a tool result when the tool declares a UI resource, and forwards the rendered app's `resources/read` and `tools/call` requests to the MCP server. The React frontend uses CopilotKit chat and hides the default tool-call rendering in favor of the app widget.
+
+The `103-localllm-qxotic` recipe uses Qxotic Jinfer's Spring AI starter to run `LiquidAI/LFM2.5-350M-GGUF:Q8_0` locally, configured through `spring.ai.jinfer.chat.model`. It registers `get-weather-for-zipcode` as a default chat tool returning sample weather data and logs chat requests and responses with `SimpleLoggerAdvisor`. No hosted model API key or separate Ollama server is required.
+
+Build the executable JAR and run it from the repository root so the interactive console can read terminal input directly:
+
+```bash
+./gradlew :103-localllm-qxotic:bootJar
+java -jar 103-localllm-qxotic/build/libs/103-localllm-qxotic-0.0.1-SNAPSHOT.jar
+```
+
+Enter a prompt such as `What is the weather in zipcode 10001?` at the console prompt. Blank lines are skipped; use Ctrl+C to stop.
 
 The `01-chat-memory` recipe uses `MessageWindowChatMemory` with a maximum of 10 messages and `MessageChatMemoryAdvisor`. It introduces a name, then asks the model to recall it using the same conversation ID. Memory is held in-process and starts fresh on each run.
 

@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: tool-use
+
+  ai:
+    jinfer:
+      chat:
+        model: LiquidAI/LFM2.5-350M-GGUF:Q8_0
+
+logging:
+  level:
+    org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor: debug
+    org.zalando: trace
