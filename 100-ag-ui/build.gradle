@@ -1,0 +1,11 @@
+dependencies {
+	implementation 'org.springframework.ai:spring-ai-starter-model-openai'
+
+	implementation 'com.ag-ui.community:ag-ui-spring-ai-webmvc-boot-starter:2.0.0'
+
+	implementation 'org.zalando:logbook-spring-boot-starter'
+	implementation 'org.zalando:logbook-okhttp'
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}

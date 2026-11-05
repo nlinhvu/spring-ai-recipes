@@ -11,7 +11,7 @@ Gradle recipes are subprojects of a shared root build; `mcp-server-oauth` contai
 - Docker, for the Redis and Qdrant recipes
 - A local Ollama installation, for recipes that use Ollama
 - JBang, for `jbang-tool-use` and `jbang-mcp`
-- Node.js and npm (`npx`), for the exchange-rate MCP server used by `22-bank-support-agent`
+- Node.js and npm, for the `100-ag-ui` frontend and the exchange-rate MCP server used by `22-bank-support-agent`
 
 The examples currently use Spring Boot 4.1.1 and Spring AI 2.0.1. Dependencies are downloaded from Maven Central through Gradle or JBang. Recipes with Inspector integration use the local [`inspector-client`](inspector-client) Gradle library module; they do not require installing an external Inspector starter into your local Maven repository. The local [`inspector-collector`](inspector-collector) application collects and displays those events (see [Inspector collector](#inspector-collector)).
 
@@ -53,6 +53,20 @@ jbang McpClientPlainApplication.java
 ```
 
 The client launches the JBang MCP server as a subprocess and communicates over stdio. Enter a weather prompt in the interactive console to use the server's sample weather tool.
+
+For `100-ag-ui`, start the Spring Boot backend and Vite frontend in separate terminals:
+
+```bash
+GEMINI_API_KEY=your-api-key ./gradlew :100-ag-ui:bootRun
+```
+
+```bash
+cd 100-ag-ui/frontend
+npm ci
+npm run dev
+```
+
+Open the URL printed by Vite. The frontend proxies `/agent` to the backend on port `8080`; ask the chat for the weather in a zip code to try its sample tool.
 
 ## Recipes
 
@@ -123,6 +137,7 @@ The client launches the JBang MCP server as a subprocess and communicates over s
 | 63 | [`23-multimodality-3-speech-and-transcription`](23-multimodality/23-multimodality-3-speech-and-transcription) | Synthesize speech and transcribe it through direct model calls and chat tools | OpenAI chat, text-to-speech and transcription, Spring AI Inspector |
 | 64 | [`23-multimodality-4-audio-chat`](23-multimodality/23-multimodality-4-audio-chat) | Send a spoken question to a chat model and receive text and audio in one response | OpenAI audio chat and text-to-speech, Spring AI Inspector |
 | 65 | [`23-multimodality-5-gemini-image-chat`](23-multimodality/23-multimodality-5-gemini-image-chat) | Generate an image through chat, then send it back as media for an edit | Google Gemini via Google GenAI, Spring AI Inspector |
+| 66 | [`100-ag-ui`](100-ag-ui)                                     | Chat with a Spring AI agent and weather tool through an AG-UI React frontend | Google Gemini via OpenAI-compatible API, AG-UI, CopilotKit, Vite |
 
 ## Inspector client
 
@@ -316,6 +331,8 @@ For `mcp-server-oauth`, this structure appears under both `auth-server/` and `mc
 The `jbang-tool-use` recipe keeps its Java sources and `application.yaml` directly in the recipe directory. `ToolUseApplication.java` declares the Java version, BOM, dependencies, and supporting source files through JBang directives.
 
 The `jbang-mcp` recipe uses the same source-based layout in separate `mcp-client/` and `mcp-server/` directories, with `McpClientPlainApplication.java` and `McpStdioServerApplication.java` as their entry points.
+
+The `100-ag-ui` recipe also contains a `frontend/` directory with its own npm package and Vite configuration.
 
 The `rag`, `rag-tool`, and `rag-hyde` examples include `src/main/resources/Sagrada.pdf`, an original synthetic knowledge-base PDF created for demonstrating document ingestion and retrieval. Despite the retained filename for compatibility with the examples, it contains no Sagrada game content.
 
