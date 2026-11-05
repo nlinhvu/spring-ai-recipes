@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: hosted-tools
+
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY:}
+      chat:
+        model: gpt-5.4
+        reasoning-effort: low
+        api: responses
+      responses:
+        hosted-tools:
+          code-interpreter:
+            enabled: true
+
+logging:
+  level:
+    org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor: debug
+    org.zalando: trace
