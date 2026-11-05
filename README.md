@@ -159,6 +159,7 @@ Open the URL printed by Vite and ask for the weather in zip code `10001` to try 
 | 67 | [`101-mcp-resource-apps`](101-mcp-resource-apps)               | Expose a weather tool linked to an HTML UI resource for MCP Apps | MCP Apps host, Spring AI MCP server, no model provider required |
 | 68 | [`102-ag-ui-mcp-apps`](102-ag-ui-mcp-apps)                     | Render MCP App widgets in an AG-UI chat and proxy their resource and tool requests | Google Gemini via OpenAI-compatible API, MCP HTTP server, AG-UI, CopilotKit, Vite |
 | 69 | [`103-localllm-qxotic`](103-localllm-qxotic)                   | Run interactive local chat with a registered weather tool using Qxotic Jinfer | Local LiquidAI LFM2.5-350M GGUF model, Qxotic Jinfer |
+| 70 | [`104-local-embeddings`](104-local-embeddings)               | Measure embedding latency across local backends and OpenAI using Spring profiles | Qxotic Jinfer, ONNX Transformers, Model JARs, Ollama, OpenAI |
 
 ## Inspector client
 
@@ -230,6 +231,30 @@ java -jar 103-localllm-qxotic/build/libs/103-localllm-qxotic-0.0.1-SNAPSHOT.jar
 ```
 
 Enter a prompt such as `What is the weather in zipcode 10001?` at the console prompt. Blank lines are skipped; use Ctrl+C to stop.
+
+The `104-local-embeddings` recipe embeds `Why is the sky blue?` with 20 warmup calls followed by 10 measured calls, logging each duration and the measured average in milliseconds. Select one backend through a Spring profile:
+
+| Profile | Embedding backend and model | Setup |
+| --- | --- | --- |
+| `qxotic` | Qxotic Jinfer, `LiquidAI/LFM2.5-Embedding-350M-GGUF:Q8_0` | Runs locally |
+| `onnx` | Spring AI Transformers with its default ONNX embedding model | Runs locally |
+| `modeljars` | Model JARs, `all-minilm-l6-v2` GGUF with Q4_K_M quantization | Runs locally using the packaged model dependency |
+| `ollama` | Ollama, `all-minilm` | Start Ollama and run `ollama pull all-minilm` |
+| `openai` | OpenAI, `text-embedding-3-small` with 384 dimensions | Supply a valid OpenAI API key |
+
+Run from the repository root, replacing `qxotic` with the desired profile:
+
+```bash
+./gradlew :104-local-embeddings:bootRun --args='--spring.profiles.active=qxotic'
+```
+
+The module's `bootRun` task enables the incubator Vector API and native access. The local profiles require no hosted model API key. For the OpenAI profile, override the placeholder key in `application.yaml`:
+
+```bash
+SPRING_AI_OPENAI_API_KEY=your-api-key ./gradlew :104-local-embeddings:bootRun --args='--spring.profiles.active=openai'
+```
+
+These timings compare the configured models and runtimes; they do not measure embedding quality.
 
 The `01-chat-memory` recipe uses `MessageWindowChatMemory` with a maximum of 10 messages and `MessageChatMemoryAdvisor`. It introduces a name, then asks the model to recall it using the same conversation ID. Memory is held in-process and starts fresh on each run.
 

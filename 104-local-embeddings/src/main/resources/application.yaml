@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: tool-use
+
+  ai:
+    openai:
+      api-key: 123
+
+logging:
+  level:
+    org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor: debug
+    org.zalando: trace

@@ -1,0 +1,37 @@
+ext {
+	set('qxoticVersion', "0.3.1")
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "com.qxotic:jinfer-bom:${qxoticVersion}"
+	}
+}
+
+dependencies {
+	implementation 'org.springframework.ai:spring-ai-starter-model-openai'
+	implementation 'org.springframework.ai:spring-ai-starter-model-ollama'
+	implementation 'org.springframework.ai:spring-ai-starter-model-transformers'
+
+	implementation("org.modeljars:modeljars:0.1.31")
+	implementation("com.integrallis:models-spring-ai:0.3.26")
+	implementation("org.modeljars.huggingface:second-state.all-minilm-l6-v2-embedding-gguf.q4_k_m:2.0.0-q4_k_m.2")
+
+
+	implementation("com.qxotic:jinfer-spring-ai-spring-boot-starter")
+	implementation("com.qxotic:jinfer-lfm2")
+	implementation("com.qxotic:jinfer-models-all")
+
+
+	runtimeOnly("com.qxotic:jam-native")
+	runtimeOnly("com.qxotic:jam-vector")
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('bootRun') {
+	jvmArgs '--add-modules', 'jdk.incubator.vector',
+			'--enable-native-access=ALL-UNNAMED'
+	optimizedLaunch = false
+}
