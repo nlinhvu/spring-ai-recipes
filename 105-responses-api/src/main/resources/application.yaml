@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: responses-api
+
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY:}
+      chat:
+        model: gpt-5.4
+        reasoning-effort: medium
+        api: responses
+      responses:
+        reasoning-summary: auto
+
+logging:
+  level:
+    org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor: debug
+    org.zalando: trace

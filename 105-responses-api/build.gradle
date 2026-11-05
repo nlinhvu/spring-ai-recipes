@@ -1,0 +1,14 @@
+dependencyManagement {
+	imports {
+		mavenBom 'org.springframework.ai:spring-ai-bom:2.1.0-RC1'
+	}
+}
+
+dependencies {
+	implementation 'org.springframework.ai:spring-ai-starter-model-openai'
+	implementation 'org.zalando:logbook-spring-boot-starter'
+	implementation 'org.zalando:logbook-okhttp'
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}

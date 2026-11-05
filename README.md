@@ -13,7 +13,7 @@ Gradle recipes are subprojects of a shared root build; `mcp-server-oauth` contai
 - JBang, for `jbang-tool-use` and `jbang-mcp`
 - Node.js and npm, for the `100-ag-ui` and `102-ag-ui-mcp-apps` frontends and the exchange-rate MCP server used by `22-bank-support-agent`
 
-The examples currently use Spring Boot 4.1.1 and Spring AI 2.0.1. Dependencies are downloaded from Maven Central through Gradle or JBang. Recipes with Inspector integration use the local [`inspector-client`](inspector-client) Gradle library module; they do not require installing an external Inspector starter into your local Maven repository. The local [`inspector-collector`](inspector-collector) application collects and displays those events (see [Inspector collector](#inspector-collector)).
+The examples currently use Spring Boot 4.1.1 and Spring AI 2.0.1 by default; `105-responses-api` imports Spring AI 2.1.0-RC1 for Responses API support. Dependencies are downloaded from Maven Central through Gradle or JBang. Recipes with Inspector integration use the local [`inspector-client`](inspector-client) Gradle library module; they do not require installing an external Inspector starter into your local Maven repository. The local [`inspector-collector`](inspector-collector) application collects and displays those events (see [Inspector collector](#inspector-collector)).
 
 ## Quick start
 
@@ -160,6 +160,7 @@ Open the URL printed by Vite and ask for the weather in zip code `10001` to try 
 | 68 | [`102-ag-ui-mcp-apps`](102-ag-ui-mcp-apps)                     | Render MCP App widgets in an AG-UI chat and proxy their resource and tool requests | Google Gemini via OpenAI-compatible API, MCP HTTP server, AG-UI, CopilotKit, Vite |
 | 69 | [`103-localllm-qxotic`](103-localllm-qxotic)                   | Run interactive local chat with a registered weather tool using Qxotic Jinfer | Local LiquidAI LFM2.5-350M GGUF model, Qxotic Jinfer |
 | 70 | [`104-local-embeddings`](104-local-embeddings)               | Measure embedding latency across local backends and OpenAI using Spring profiles | Qxotic Jinfer, ONNX Transformers, Model JARs, Ollama, OpenAI |
+| 71 | [`105-responses-api`](105-responses-api)                     | Use the OpenAI Responses API for interactive chat, board-game tool calling, and reasoning summaries | OpenAI, Spring AI 2.1.0-RC1 |
 
 ## Inspector client
 
@@ -210,7 +211,7 @@ Model provider API keys are read from environment variables and are intentionall
 
 | Variable | Used by |
 | --- | --- |
-| `OPENAI_API_KEY` | `02-rag`, `03-modular-rag`, `08-tool-search-tool`, `09-tool-search-tool-jev`, `23-multimodality-2-image-generation`, `23-multimodality-3-speech-and-transcription`, `23-multimodality-4-audio-chat`, `voicechat-stt`, `voicechat-tts`, and the OpenAI portion of `voicechat-tts-elevenlabs` |
+| `OPENAI_API_KEY` | `02-rag`, `03-modular-rag`, `08-tool-search-tool`, `09-tool-search-tool-jev`, `23-multimodality-2-image-generation`, `23-multimodality-3-speech-and-transcription`, `23-multimodality-4-audio-chat`, `105-responses-api`, `voicechat-stt`, `voicechat-tts`, and the OpenAI portion of `voicechat-tts-elevenlabs` |
 | `GEMINI_API_KEY` | Gemini-based examples, including `01-chat-memory`, `04-guardrails-input`, `05-guardrails-structured-output`, `06-guardrails-builtin-structured-output`, `07-guardrails-jev`, `10-as-a-judge-llm`, `11-as-a-judge-jev`, `12-tool-argument-augmenter`, `13-skills`, `14-todo-write`, `15-ask-user-question`, `16-subagents`, `19-auto-memory`, `20-memory-session`, `22-bank-support-agent`, `23-multimodality-1-vision-chat`, `23-multimodality-5-gemini-image-chat`, and other recipes using either Google GenAI or the OpenAI-compatible Gemini endpoint |
 | `TYPESAFE_API_KEY` | `typesafe-simple` (defaults to `nothing`), `03-modular-rag`, `07-guardrails-jev`, `09-tool-search-tool-jev`, and `11-as-a-judge-jev` (the latter four default to `ollama`), all configured for a local endpoint |
 | `ELEVENLABS_API_KEY` | `voicechat-tts-elevenlabs` |
@@ -255,6 +256,17 @@ SPRING_AI_OPENAI_API_KEY=your-api-key ./gradlew :104-local-embeddings:bootRun --
 ```
 
 These timings compare the configured models and runtimes; they do not measure embedding quality.
+
+The `105-responses-api` recipe selects the OpenAI Responses API with `spring.ai.openai.chat.api: responses` and uses `gpt-5.4` with `reasoning-effort: medium` and `spring.ai.openai.responses.reasoning-summary: auto`. Its interactive chat client registers `GameTools.findGames`, which returns a fixed list of board games with player counts, play times, complexity, and cooperative status. After each response, the application logs the reasoning summary from `OpenAiResponsesMetadata.REASONING_CONTENT` and the final answer. `SimpleLoggerAdvisor` and a Logbook OkHttp interceptor log chat and HTTP traffic.
+
+Build and run it from the repository root so the console can read terminal input directly:
+
+```bash
+./gradlew :105-responses-api:bootJar
+OPENAI_API_KEY=your-api-key java -jar 105-responses-api/build/libs/105-responses-api-0.0.1-SNAPSHOT.jar
+```
+
+Try `Which cooperative board game would you recommend for four players with 30 minutes to play?` at the console prompt. Blank lines are skipped; use Ctrl+C to stop. The module imports its own Spring AI `2.1.0-RC1` BOM to override the shared version.
 
 The `01-chat-memory` recipe uses `MessageWindowChatMemory` with a maximum of 10 messages and `MessageChatMemoryAdvisor`. It introduces a name, then asks the model to recall it using the same conversation ID. Memory is held in-process and starts fresh on each run.
 
