@@ -11,7 +11,7 @@ Gradle recipes are subprojects of a shared root build; `mcp-server-oauth` contai
 - Docker, for the Redis and Qdrant recipes
 - A local Ollama installation, for recipes that use Ollama
 - JBang, for `jbang-tool-use` and `jbang-mcp`
-- Node.js and npm, for the `100-ag-ui` frontend and the exchange-rate MCP server used by `22-bank-support-agent`
+- Node.js and npm, for the `100-ag-ui` and `102-ag-ui-mcp-apps` frontends and the exchange-rate MCP server used by `22-bank-support-agent`
 
 The examples currently use Spring Boot 4.1.1 and Spring AI 2.0.1. Dependencies are downloaded from Maven Central through Gradle or JBang. Recipes with Inspector integration use the local [`inspector-client`](inspector-client) Gradle library module; they do not require installing an external Inspector starter into your local Maven repository. The local [`inspector-collector`](inspector-collector) application collects and displays those events (see [Inspector collector](#inspector-collector)).
 
@@ -67,6 +67,24 @@ npm run dev
 ```
 
 Open the URL printed by Vite. The frontend proxies `/agent` to the backend on port `8080`; ask the chat for the weather in a zip code to try its sample tool.
+
+For `101-mcp-resource-apps` and `102-ag-ui-mcp-apps`, start the MCP server first, then the AG-UI backend and frontend in separate terminals. Run the Gradle commands from the repository root:
+
+```bash
+./gradlew :101-mcp-resource-apps:bootRun
+```
+
+```bash
+GEMINI_API_KEY=your-api-key ./gradlew :102-ag-ui-mcp-apps:bootRun
+```
+
+```bash
+cd 102-ag-ui-mcp-apps/frontend
+npm ci
+npm run dev
+```
+
+Open the URL printed by Vite and ask for the weather in zip code `10001` to try the MCP App weather widget. The MCP server listens on port `3000`, the AG-UI backend on `8080`, and Vite proxies `/agent` to the backend. Run `102-ag-ui-mcp-apps` in place of `100-ag-ui`, since both backends use port `8080`.
 
 ## Recipes
 
@@ -138,6 +156,8 @@ Open the URL printed by Vite. The frontend proxies `/agent` to the backend on po
 | 64 | [`23-multimodality-4-audio-chat`](23-multimodality/23-multimodality-4-audio-chat) | Send a spoken question to a chat model and receive text and audio in one response | OpenAI audio chat and text-to-speech, Spring AI Inspector |
 | 65 | [`23-multimodality-5-gemini-image-chat`](23-multimodality/23-multimodality-5-gemini-image-chat) | Generate an image through chat, then send it back as media for an edit | Google Gemini via Google GenAI, Spring AI Inspector |
 | 66 | [`100-ag-ui`](100-ag-ui)                                     | Chat with a Spring AI agent and weather tool through an AG-UI React frontend | Google Gemini via OpenAI-compatible API, AG-UI, CopilotKit, Vite |
+| 67 | [`101-mcp-resource-apps`](101-mcp-resource-apps)               | Expose a weather tool linked to an HTML UI resource for MCP Apps | MCP Apps host, Spring AI MCP server, no model provider required |
+| 68 | [`102-ag-ui-mcp-apps`](102-ag-ui-mcp-apps)                     | Render MCP App widgets in an AG-UI chat and proxy their resource and tool requests | Google Gemini via OpenAI-compatible API, MCP HTTP server, AG-UI, CopilotKit, Vite |
 
 ## Inspector client
 
@@ -194,6 +214,10 @@ Model provider API keys are read from environment variables and are intentionall
 | `ELEVENLABS_API_KEY` | `voicechat-tts-elevenlabs` |
 
 The exact model and endpoint settings are in each project's `src/main/resources/application.yaml` or `application.properties`. JBang recipes keep `application.yaml` alongside their Java sources: in `jbang-tool-use/`, `jbang-mcp/mcp-client/`, and `jbang-mcp/mcp-server/`.
+
+The `101-mcp-resource-apps` recipe exposes `get-weather-for-zipcode` over stateless Streamable HTTP at `http://localhost:3000/mcp`. Its tool metadata points to `ui://weather/weather.html`, served through `resources/read` with MIME type `text/html;profile=mcp-app`. The tool returns sample weather data; the HTML is a separate resource that an MCP Apps host can fetch and render. This server requires no model API key and shares port `3000` with the other MCP HTTP server recipes.
+
+The `102-ag-ui-mcp-apps` recipe connects to that server and exposes its tools through a Spring AI agent using `GEMINI_API_KEY`. Its `McpAppsAgent` emits an `mcp-apps` activity after a tool result when the tool declares a UI resource, and forwards the rendered app's `resources/read` and `tools/call` requests to the MCP server. The React frontend uses CopilotKit chat and hides the default tool-call rendering in favor of the app widget.
 
 The `01-chat-memory` recipe uses `MessageWindowChatMemory` with a maximum of 10 messages and `MessageChatMemoryAdvisor`. It introduces a name, then asks the model to recall it using the same conversation ID. Memory is held in-process and starts fresh on each run.
 
@@ -332,7 +356,7 @@ The `jbang-tool-use` recipe keeps its Java sources and `application.yaml` direct
 
 The `jbang-mcp` recipe uses the same source-based layout in separate `mcp-client/` and `mcp-server/` directories, with `McpClientPlainApplication.java` and `McpStdioServerApplication.java` as their entry points.
 
-The `100-ag-ui` recipe also contains a `frontend/` directory with its own npm package and Vite configuration.
+The `100-ag-ui` and `102-ag-ui-mcp-apps` recipes also contain a `frontend/` directory with its own npm package and Vite configuration. The `101-mcp-resource-apps` recipe keeps its weather widget HTML in `src/main/resources/app/weather.html`.
 
 The `rag`, `rag-tool`, and `rag-hyde` examples include `src/main/resources/Sagrada.pdf`, an original synthetic knowledge-base PDF created for demonstrating document ingestion and retrieval. Despite the retained filename for compatibility with the examples, it contains no Sagrada game content.
 
