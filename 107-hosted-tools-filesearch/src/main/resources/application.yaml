@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: hosted-tools-filesearch
+
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY:}
+      chat:
+        model: gpt-5.4
+        reasoning-effort: low
+        api: responses
+      responses:
+        hosted-tools:
+          file-search:
+            vector-store-ids:
+              - vs_6aed5b2dfe4c8191a3900d06e81ebaa7
+
+logging:
+  level:
+    org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor: debug
+    org.zalando: trace

@@ -13,7 +13,7 @@ Gradle recipes are subprojects of a shared root build; `mcp-server-oauth` contai
 - JBang, for `jbang-tool-use` and `jbang-mcp`
 - Node.js and npm, for the `100-ag-ui` and `102-ag-ui-mcp-apps` frontends and the exchange-rate MCP server used by `22-bank-support-agent`
 
-The examples currently use Spring Boot 4.1.1 and Spring AI 2.0.1 by default; `105-responses-api` and `106-hosted-tools-code-interpreter` import Spring AI 2.1.0-RC1 for Responses API support. Dependencies are downloaded from Maven Central through Gradle or JBang. Recipes with Inspector integration use the local [`inspector-client`](inspector-client) Gradle library module; they do not require installing an external Inspector starter into your local Maven repository. The local [`inspector-collector`](inspector-collector) application collects and displays those events (see [Inspector collector](#inspector-collector)).
+The examples currently use Spring Boot 4.1.1 and Spring AI 2.0.1 by default; `105-responses-api`, `106-hosted-tools-code-interpreter`, and `107-hosted-tools-filesearch` import Spring AI 2.1.0-RC1 for Responses API support. Dependencies are downloaded from Maven Central through Gradle or JBang. Recipes with Inspector integration use the local [`inspector-client`](inspector-client) Gradle library module; they do not require installing an external Inspector starter into your local Maven repository. The local [`inspector-collector`](inspector-collector) application collects and displays those events (see [Inspector collector](#inspector-collector)).
 
 ## Quick start
 
@@ -162,6 +162,7 @@ Open the URL printed by Vite and ask for the weather in zip code `10001` to try 
 | 70 | [`104-local-embeddings`](104-local-embeddings)               | Measure embedding latency across local backends and OpenAI using Spring profiles | Qxotic Jinfer, ONNX Transformers, Model JARs, Ollama, OpenAI |
 | 71 | [`105-responses-api`](105-responses-api)                     | Use the OpenAI Responses API for interactive chat, board-game tool calling, and reasoning summaries | OpenAI, Spring AI 2.1.0-RC1 |
 | 72 | [`106-hosted-tools-code-interpreter`](106-hosted-tools-code-interpreter) | Run a Python dice simulation with the hosted Code Interpreter and inspect its generated code | OpenAI Responses API, Spring AI 2.1.0-RC1 |
+| 73 | [`107-hosted-tools-filesearch`](107-hosted-tools-filesearch) | Chat with documents through hosted File Search and an OpenAI vector store | OpenAI Responses API, Spring AI 2.1.0-RC1 |
 
 ## Inspector client
 
@@ -212,7 +213,7 @@ Model provider API keys are read from environment variables and are intentionall
 
 | Variable | Used by |
 | --- | --- |
-| `OPENAI_API_KEY` | `02-rag`, `03-modular-rag`, `08-tool-search-tool`, `09-tool-search-tool-jev`, `23-multimodality-2-image-generation`, `23-multimodality-3-speech-and-transcription`, `23-multimodality-4-audio-chat`, `105-responses-api`, `106-hosted-tools-code-interpreter`, `voicechat-stt`, `voicechat-tts`, and the OpenAI portion of `voicechat-tts-elevenlabs` |
+| `OPENAI_API_KEY` | `02-rag`, `03-modular-rag`, `08-tool-search-tool`, `09-tool-search-tool-jev`, `23-multimodality-2-image-generation`, `23-multimodality-3-speech-and-transcription`, `23-multimodality-4-audio-chat`, `105-responses-api`, `106-hosted-tools-code-interpreter`, `107-hosted-tools-filesearch`, `voicechat-stt`, `voicechat-tts`, and the OpenAI portion of `voicechat-tts-elevenlabs` |
 | `GEMINI_API_KEY` | Gemini-based examples, including `01-chat-memory`, `04-guardrails-input`, `05-guardrails-structured-output`, `06-guardrails-builtin-structured-output`, `07-guardrails-jev`, `10-as-a-judge-llm`, `11-as-a-judge-jev`, `12-tool-argument-augmenter`, `13-skills`, `14-todo-write`, `15-ask-user-question`, `16-subagents`, `19-auto-memory`, `20-memory-session`, `22-bank-support-agent`, `23-multimodality-1-vision-chat`, `23-multimodality-5-gemini-image-chat`, and other recipes using either Google GenAI or the OpenAI-compatible Gemini endpoint |
 | `TYPESAFE_API_KEY` | `typesafe-simple` (defaults to `nothing`), `03-modular-rag`, `07-guardrails-jev`, `09-tool-search-tool-jev`, and `11-as-a-judge-jev` (the latter four default to `ollama`), all configured for a local endpoint |
 | `ELEVENLABS_API_KEY` | `voicechat-tts-elevenlabs` |
@@ -278,6 +279,17 @@ OPENAI_API_KEY=your-api-key ./gradlew :106-hosted-tools-code-interpreter:bootRun
 ```
 
 The module imports Spring AI `2.1.0-RC1` and runs the simulation once at startup; no console input or local Python installation is required.
+
+The `107-hosted-tools-filesearch` recipe uses the OpenAI Responses API with `gpt-5.4` and `reasoning-effort: low` to answer interactive questions using hosted File Search. Configure your OpenAI vector store IDs under `spring.ai.openai.responses.hosted-tools.file-search.vector-store-ids` in `107-hosted-tools-filesearch/src/main/resources/application.yaml`, replacing the checked-in example ID with a store accessible to your API key. Create a vector store, upload your documents, attach the uploaded files to the store, and wait for processing to complete before asking questions. `ToolUseApplication.java` includes example curl commands for this setup, status checks, and cleanup; the application itself does not upload or ingest documents.
+
+Build and run from the repository root so the interactive console can read terminal input directly:
+
+```bash
+./gradlew :107-hosted-tools-filesearch:bootJar
+OPENAI_API_KEY=your-api-key java -jar 107-hosted-tools-filesearch/build/libs/107-hosted-tools-filesearch-0.0.1-SNAPSHOT.jar
+```
+
+Ask a question about your uploaded documents at the console prompt. Blank lines are skipped; use Ctrl+C to stop. The module imports Spring AI `2.1.0-RC1` and logs chat and HTTP traffic through `SimpleLoggerAdvisor` and Logbook.
 
 The `01-chat-memory` recipe uses `MessageWindowChatMemory` with a maximum of 10 messages and `MessageChatMemoryAdvisor`. It introduces a name, then asks the model to recall it using the same conversation ID. Memory is held in-process and starts fresh on each run.
 
